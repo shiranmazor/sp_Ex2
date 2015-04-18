@@ -22,7 +22,7 @@ int createPolynomial(char *name)
 
 char* initCommands(void)
 {
-	char *commands[3];
+	char *commands[10];
 	commands[0] = "=";
 	commands[1] = "+";
 	commands[2] = "-";
@@ -37,7 +37,7 @@ int main(void)
 {
 	Polynomial *polynomials;
 	//init commands
-	const char commands = initCommands();
+	const char *commands = initCommands();
 
 	printf("Welcome to Polynomials!\n");
 	printf(" > ");
