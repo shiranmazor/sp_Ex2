@@ -7,7 +7,7 @@
 #include "Polynomial.h"
 #include <string.h>
 
-
+//test
 struct Polynomial{
 	char *name;
 	float *coeffs;
