@@ -1,0 +1,10 @@
+typedef struct Polynomial Polynomial;
+int checkName(char *name, char *commands);
+char* initCommands(void);
+int createPolynomial(char *name);
+int Print(char *name);
+Polynomial summation(char *name1, char *name2);
+Polynomial subtraction(char *name1, char *name2);
+Polynomial multiplication(char *name1, char *name2);
+Polynomial derivation(char *name);
+float evaluation(char *name, float value);
