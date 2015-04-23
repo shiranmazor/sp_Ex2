@@ -21,6 +21,6 @@ char* getString(size_t size);
 char* remove_spaces(char* src, char* target);
 int isPolynomial(char* pString);
 int isNumber(char* str);
-int getPolynomial(char* name);
+Polynomial *getPolynomial(char* name);
 char* replace(const char *s, char ch, const char *repl);
 int getMaxDegree(char **arrP, int arr_len);

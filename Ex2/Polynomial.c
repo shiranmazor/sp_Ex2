@@ -13,15 +13,18 @@ struct Polynomial{
 	char *name;
 	//the value in the fields is the coeff and the index is the degree
 	float *coeffs;
+	Polynomial *next;
 };
 
+Polynomial *firstPolynomialPtr;
+Polynomial *lastPolynomialPtr;
 //help function implementation:
 
-char* getString(FILE* fp, size_t size)
 /*
 reading string input from user and relloc the char pointer
 size - initial size of the pointer
 */
+char* getString(FILE* fp, size_t size)
 {
 	char *str;
 	int ch;
@@ -220,13 +223,28 @@ int executeOperation(char* input)
 			
 		return 1;
 	}
-	
+
 }
 
-int getPolynomial(char* name)
-/*will return the position of the polynom in the database else will return -1*/
+/*
+Returns polynomial with the provided name, NULL if not exists
+*/
+Polynomial* getPolynomial(char* name)
 {
-	return -1;
+	if (firstPolynomialPtr == NULL) //no polynomial was defined
+		return NULL;
+
+	Polynomial *currentPolynomial = firstPolynomialPtr;
+	do
+	{
+		if (strcmp((*currentPolynomial).name, name) == 0)			
+			return currentPolynomial;
+
+		currentPolynomial = (*currentPolynomial).next;
+	} while (currentPolynomial != NULL);
+
+
+	return NULL;
 }
 
 /*return tha maximum degree of the polynom for initializing the coeffs array size*/
@@ -253,84 +271,96 @@ int getMaxDegree(char **arrP, int arr_len)
 //1:
 int createPolynomial(char *name, char* polynomialStr)
 {
-	if (getPolynomial(polynomialStr) == -1)
+	Polynomial *pol = getPolynomial(name);
+
+	if (pol == NULL) //polynom with that name doesn't exsist
 	{
 		//create new
-		Polynomial *p = malloc(sizeof(struct Polynomial));
-		p->name = malloc(strlen(name) + 1);
-		strcpy(p->name, name);
-
-		//extract coeffs and exponents
-		float tmpNum = 1;
-		char *newP = replace(polynomialStr, '-', "+-");
-		char **arrP = NULL;
-		int p_len = split(newP, '+', &arrP);
-		int max_deg = getMaxDegree(arrP, p_len);
-
-		//init coeffs array and alocate memory with zero values:
-		p->coeffs = (float*)calloc(max_deg+1,sizeof(float));
-		//let's fill in the coeffs array
-		for (int i = 0; i < p_len; i++)
+		pol = malloc(sizeof(struct Polynomial));
+	
+		if (firstPolynomialPtr == NULL)
 		{
-			if (strchr(arrP[i], '^') != NULL)
-			{
-				char **tmpArr = NULL;
-				int len = split(arrP[i], '^', &tmpArr);
-				int index = *tmpArr[len - 1] - '0';
-				if (strcmp(tmpArr[0], "x") == 0)
-					p->coeffs[index] = 1;
-				if (strcmp(tmpArr[0], "-x") == 0)
-					p->coeffs[index] = -1;
-				else
-				{
-					//split with x:
-					char* start = strtok(*tmpArr, 'x');
-					//check if negative:
-					if (strchr(start, "-") != NULL)
-					{
-						int len = split(arrP[i], '-', &tmpArr);
-						float num = (float)tmpArr[len - 1][0];
-						num = num*(-1);
-						p->coeffs[index] = num;
-					}
-					else
-					{
-						p->coeffs[index] = (float)*start - '0';
-					}
-					int i = 5;
-				}
-				
-
-			}
-			else
-			{
-				float num = atof(arrP[i]);
-				if (isNumber(arrP[i]) == 1)
-				{
-					
-					int i = 7;
-				}
-					
-			}
+			firstPolynomialPtr = pol;
+			lastPolynomialPtr = firstPolynomialPtr;
 		}
-		/*
-		float *c;
-		c = (float*)malloc(sizeof(float)*2);
-		c[0] = (float)3;
-		c[1] = (float)4.5;
-		for (int i = 0; i < 2; i++)
+		else
 		{
-		float u = c[i];
-
+			(*lastPolynomialPtr).next = pol;
+			lastPolynomialPtr = pol;
 		}
-		*/
-
-		
+		lastPolynomialPtr->next = NULL;
+	
+		pol->name = malloc(strlen(name) + 1);
+		strcpy(pol->name, name);
 	}
 	else
 	{
+		printf("updated %s\n",name);
 		//update existing
 	}
+
+	//extract coeffs and exponents
+
+	char *newP = replace(polynomialStr, '-', "+-");
+	char **arrP = NULL;
+	int p_len = split(newP, '+', &arrP);
+	int max_deg = getMaxDegree(arrP, p_len);
+
+	//init coeffs array and alocate memory with zero values:
+	pol->coeffs = (float*)calloc(max_deg + 1, sizeof(float));
+	//let's fill in the coeffs array
+	for (int i = 0; i < p_len; i++)
+	{
+		if (strchr(arrP[i], '^') != NULL)
+		{
+			char **tmpArr = NULL;
+			int len = split(arrP[i], '^', &tmpArr);
+			int index = *tmpArr[len - 1] - '0';
+			if (strcmp(tmpArr[0], "x") == 0)
+				pol->coeffs[index] = 1;
+			if (strcmp(tmpArr[0], "-x") == 0)
+				pol->coeffs[index] = -1;
+			else
+			{
+				//split with x:
+				char* start = strtok(*tmpArr, 'x');
+				//check if negative:
+				if (strchr(start, "-") != NULL)
+				{
+					int len = split(arrP[i], '-', &tmpArr);
+					float num = (float)tmpArr[len - 1][0];
+					num = num*(-1);
+					pol->coeffs[index] = num;
+				}
+				else
+				{
+					pol->coeffs[index] = (float)*start - '0';
+				}
+				int i = 5;
+			}
+		}
+		else
+		{
+			float num = atof(arrP[i]);
+			if (isNumber(arrP[i]) == 1)
+			{
+
+				int i = 7;
+			}
+
+		}
+	}
+	/*
+	float *c;
+	c = (float*)malloc(sizeof(float)*2);
+	c[0] = (float)3;
+	c[1] = (float)4.5;
+	for (int i = 0; i < 2; i++)
+	{
+	float u = c[i];
+
+	}
+	*/
 	return 0;
 }
 //8:
@@ -341,8 +371,7 @@ int createFromExisting(char* newName, char* pString)
 
 int main(void)
 {
-	Polynomial *polynomials;
-	
+	lastPolynomialPtr = firstPolynomialPtr;
 
 	printf("Welcome to Polynomials!\n");
 	printf(" > ");
