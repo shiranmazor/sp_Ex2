@@ -11,19 +11,6 @@ float evaluation(char *name, float value);//7
 int createFromExisting(char* newName, char* pString);//8
 
 
-typedef enum operation
-{
-	CREATE,
-	PRINT,
-	SUM,
-	SUB,
-	MUL,
-	DER,
-	EVAL,
-	OP,
-	ERROR
-
-};
 
 //help function
 //enum operation getOperation(char* input);
@@ -35,3 +22,5 @@ char* remove_spaces(char* src, char* target);
 int isPolynomial(char* pString);
 int isNumber(char* str);
 int getPolynomial(char* name);
+char* replace(const char *s, char ch, const char *repl);
+int getMaxDegree(char **arrP, int arr_len);
