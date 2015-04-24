@@ -141,7 +141,7 @@ int checkPName(char *name)
 			return 0;
 	}
 	//check if one of the commands are in varible name
-	if (strcmp(name, "der") == 0 || strcmp(name, "eval") == 0 || strcmp(name, "quit") == 0)
+	if (strcmp(name, "der") == 0 || strcmp(name, "eval") == 0 || strcmp(name, "quit") == 0 || strcmp(name, "x") == 0)
 		return 0;
 
 	//name is o.k
@@ -151,6 +151,7 @@ int checkPName(char *name)
 /*check if the string that given is in the form of polynom with x varible*/
 int isPolynomial(char* pString)
 {
+	int res = 0;
 	//check if the chars - x only /x and ^/ number digit exist in the string
 	//else return 0 - this mean polynom name
 	if (strcmp(pString, "x") == 0 || isNumber(pString) == 1)
@@ -165,9 +166,11 @@ int isPolynomial(char* pString)
 			char **arr = NULL;
 			int len = split(pString, 'x', &arr);
 			if (isNumber(arr[0]) == 1)
-				return 1;
+				res = 1;
+			free(arr);
 		}
-		return 0;
+		
+		return res;
 	}
 	
 }
@@ -210,14 +213,12 @@ char* replace(const char *s, char ch, const char *repl) {
 
 int executeOperation(char* input)
 {
-	enum operation op;
 	removeSpaces(input);
-
 
 	char **arr = NULL;
 	int arr_len = split(input, '=', &arr);
 	//arr_len should be 2
-	if (arr_len > 1)//found '=' char in command - create
+	if (arr_len > 1)//found '=' char in command - create new/from existing
 	{	
 		//the command should be or cerate new or create from an existing object
 		char* pName = arr[0];
@@ -249,6 +250,17 @@ int executeOperation(char* input)
 			printf("unknown polynomial %s\n", input);
 		}
 	}
+	else if (strchr(input, '+') != NULL)//+ exist without '=' - sum
+	{
+		char **arrSum = NULL;
+		int arr_len = split(input, '+', &arrSum);
+		Polynomial *res = summation(arrSum[0], arrSum[1]);
+		if (res != NULL)
+			print(res);
+		free(res);
+		free(arrSum);
+	}
+	free(arr);
 	return 1;
 }
 
@@ -277,12 +289,12 @@ int getMaxDegree(char **arrP, int arr_len)
 {
 	int max_deg = 0;
 	int current = 0;
+	char **arr = NULL;
 	for (int i = 0; i < arr_len; i++)
 	{
 		char* item = arrP[i];
 		if (strchr(item, '^') != NULL)
 		{
-			char **arr = NULL;
 			int arr_len = split(item, '^', &arr);
 			current = *arr[arr_len - 1] - '0';
 			if (current > max_deg)
@@ -296,6 +308,7 @@ int getMaxDegree(char **arrP, int arr_len)
 		}
 			
 	}
+	free(arr);
 	return max_deg;
 }
 
@@ -305,6 +318,7 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 	//extract coeffs and exponents
 
 	char *newP = replace(polyStr, '-', "+-");
+	free(polyStr);
 	char **arrP = NULL;
 	int p_len = split(newP, '+', &arrP);
 	int max_deg = getMaxDegree(arrP, p_len);
@@ -333,9 +347,9 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 				int len = split(tmpArr[0], 'x', &tmpArr2);
 				float num = atof(tmpArr2[0]);
 				pol->coeffs[index] = num;
-				
-				int i = 5;
+				free(tmpArr2);
 			}
+			free(tmpArr);
 		}
 		else//don't have '^' in it- degree =0/1
 		{
@@ -352,12 +366,13 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 			{
 				char **tmpArr = NULL;
 				int len = split(arrP[i], 'x', &tmpArr);
-				if (isNumber(tmpArr[0]))
-					pol->coeffs[1] = atof(tmpArr[0]);
+				pol->coeffs[1] = atof(tmpArr[0]);
+				free(tmpArr);
 			}
 
 		}
 	}
+	free(arrP);
 }
 
 //program functions
@@ -422,15 +437,26 @@ void print(Polynomial *pol)
 			{
 				if (first == 1)
 				{
-					printf("%.2fx", arr[i]);
+					if (arr[i] == 1)
+						printf("x");
+					else if (arr[i] == -1)
+						printf("-x");
+					else
+						printf("%.2fx", arr[i]);
 					first = 0;
 				}
 				else
 				{
 					if (arr[i]>0)
-						printf(" + %.2fx", arr[i]);
+						if (arr[i] == 1)
+							printf(" +x");
+						else
+							printf(" + %.2fx", arr[i]);
 					else
-						printf(" %.2fx", arr[i]);
+						if (arr[i] == -1)
+							printf(" -x");
+						else
+							printf(" %.2fx", arr[i]);
 				}
 					
 			}
@@ -439,21 +465,66 @@ void print(Polynomial *pol)
 				//i>2
 				if (first == 1)
 				{
-					printf("%.2fx^%d", arr[i], i);
+					if (arr[i] == 1)
+						printf("x^%d", i);
+					else if (arr[i] == -1)
+						printf("-x^%d", i);
+					else
+						printf("%.2fx^%d", arr[i], i);
 					first = 0;
 				}
 				else
 				{
 					if (arr[i]>0)
-						printf(" + %.2fx^%d", arr[i], i);
+						if (arr[i] == 1)
+							printf(" + x^%d", arr[i], i);
+						else
+							printf(" + %.2fx^%d", arr[i], i);
 					else
-						printf(" %.2fx^%d", arr[i], i);
+						if (arr[i] ==-1)
+							printf(" -x^%d", arr[i], i);
+						else
+							printf(" %.2fx^%d", arr[i], i);
 
 				}
 				
 			}
 		}
 	}
+	printf("\n");
+}
+//3:sum:
+Polynomial* summation(char *name1, char *name2)
+{
+	Polynomial *res = NULL;
+	Polynomial* p1 = getPolynomial(name1);
+	Polynomial* p2 = getPolynomial(name2);
+	if (p1 == NULL)
+		printf("unknown polynomial %s\n", name1);
+	else if (p2 == NULL)
+		printf("unknown polynomial %s\n", name2);
+	else
+	{
+		res = malloc(sizeof(struct Polynomial));
+		res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
+		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+		int i = 0;
+		while (i < p1->p_len && i < p2->p_len)
+		{
+			res->coeffs[i] = p1->coeffs[i] + p2->coeffs[i];
+			i++;
+		}
+		if (i < p1->p_len)
+		{
+			for (int j = i; j < p1->p_len; j++)
+				res->coeffs[j] = p1->coeffs[j];
+		}
+		else if (i < p2->p_len)
+		for (int j = i; j < p2->p_len; j++)
+			res->coeffs[j] = p2->coeffs[j];
+		
+	}
+	return res;
 }
 //8:
 int createFromExisting(char* newName, char* pString)
