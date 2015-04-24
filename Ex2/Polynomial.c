@@ -270,7 +270,7 @@ int executeOperation(char* input)
 		free(res);
 		free(arrSub);
 	}
-	else if (strchr(input, '*') != NULL)//* exist without '=' - mul
+	else if (strchr(input, '*') != NULL)// mul
 	{
 		char **arrMul = NULL;
 		int arr_len = split(input, '*', &arrMul);
