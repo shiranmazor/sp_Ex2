@@ -260,6 +260,32 @@ int executeOperation(char* input)
 		free(res);
 		free(arrSum);
 	}
+	else if (strchr(input, '-') != NULL)//- exist without '=' - sub
+	{
+		char **arrSub = NULL;
+		int arr_len = split(input, '-', &arrSub);
+		Polynomial *res = subtraction(arrSub[0], arrSub[1]);
+		if (res != NULL)
+			print(res);
+		free(res);
+		free(arrSub);
+	}
+	else if (strchr(input, '*') != NULL)//* exist without '=' - mul
+	{
+		char **arrMul = NULL;
+		int arr_len = split(input, '*', &arrMul);
+		Polynomial *res = multiplication(arrMul[0], arrMul[1]);
+		if (res != NULL)
+			print(res);
+		free(res);
+		free(arrMul);
+	}
+	else if (strstr(input, "der"))//driven
+	{
+		memmove(input, input + 3, strlen(input) - 2);
+		Polynomial *res = derivation(input);
+	}	
+	
 	free(arr);
 	return 1;
 }
@@ -523,6 +549,80 @@ Polynomial* summation(char *name1, char *name2)
 		for (int j = i; j < p2->p_len; j++)
 			res->coeffs[j] = p2->coeffs[j];
 		
+	}
+	return res;
+}
+//4:sub
+Polynomial* subtraction(char *name1, char *name2)
+{
+	Polynomial *res = NULL;
+	Polynomial* p1 = getPolynomial(name1);
+	Polynomial* p2 = getPolynomial(name2);
+	if (p1 == NULL)
+		printf("unknown polynomial %s\n", name1);
+	else if (p2 == NULL)
+		printf("unknown polynomial %s\n", name2);
+	else
+	{
+		res = malloc(sizeof(struct Polynomial));
+		res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
+		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+		int i = 0;
+		while (i < p1->p_len && i < p2->p_len)
+		{
+			res->coeffs[i] = p1->coeffs[i] - p2->coeffs[i];
+			i++;
+		}
+		if (i < p1->p_len)
+		{
+			for (int j = i; j < p1->p_len; j++)
+				res->coeffs[j] = p1->coeffs[j];
+		}
+		else if (i < p2->p_len)
+		for (int j = i; j < p2->p_len; j++)
+			res->coeffs[j] = p2->coeffs[j] * (-1);
+
+	}
+	return res;
+}
+//5:mul:
+Polynomial* multiplication(char *name1, char *name2)
+{
+	Polynomial *res = NULL;
+	Polynomial* p1 = getPolynomial(name1);
+	Polynomial* p2 = getPolynomial(name2);
+	if (p1 == NULL)
+		printf("unknown polynomial %s\n", name1);
+	else if (p2 == NULL)
+		printf("unknown polynomial %s\n", name2);
+	else
+	{
+	}
+	return res;
+}
+//6:deriven
+Polynomial* derivation(char *name)
+{
+	Polynomial *res = NULL;
+	Polynomial* p1 = getPolynomial(name);
+	if (p1 == NULL)
+		printf("unknown polynomial %s\n", name);
+	else
+	{
+
+	}
+	return res;
+}
+//7:
+float evaluation(char *name, float value)
+{
+	float res = 0;
+	Polynomial* p1 = getPolynomial(name);
+	if (p1 == NULL)
+		printf("unknown polynomial %s\n", name);
+	else
+	{
+
 	}
 	return res;
 }
