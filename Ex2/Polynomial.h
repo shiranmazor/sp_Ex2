@@ -4,6 +4,7 @@ typedef struct Polynomial Polynomial;
 int createPolynomial(char *name, char* polynomialStr);//1
 void print(Polynomial *pol);//2
 Polynomial* summation(char *name1, char *name2);//3
+Polynomial* summationByPolynomials(Polynomial* p1, Polynomial* p2);
 Polynomial* subtraction(char *name1, char *name2);//4
 Polynomial* multiplication(char *name1, char *name2);//5
 Polynomial* derivation(char *name);//6

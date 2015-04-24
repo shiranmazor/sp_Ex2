@@ -519,10 +519,32 @@ void print(Polynomial *pol)
 	}
 	printf("\n");
 }
+
+Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
+{
+	Polynomial *res = NULL;
+	res = malloc(sizeof(struct Polynomial));
+	res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
+	res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+	int i = 0;
+	while (i < p1->p_len && i < p2->p_len)
+	{
+		res->coeffs[i] = p1->coeffs[i] + p2->coeffs[i];
+		i++;
+	}
+	if (i < p1->p_len)
+	{
+		for (int j = i; j < p1->p_len; j++)
+			res->coeffs[j] = p1->coeffs[j];
+	}
+	else if (i < p2->p_len)
+		for (int j = i; j < p2->p_len; j++)
+			res->coeffs[j] = p2->coeffs[j];
+}
 //3:sum:
 Polynomial* summation(char *name1, char *name2)
 {
-	Polynomial *res = NULL;
+	
 	Polynomial* p1 = getPolynomial(name1);
 	Polynomial* p2 = getPolynomial(name2);
 	if (p1 == NULL)
@@ -531,26 +553,9 @@ Polynomial* summation(char *name1, char *name2)
 		printf("unknown polynomial %s\n", name2);
 	else
 	{
-		res = malloc(sizeof(struct Polynomial));
-		res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
-		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
-		int i = 0;
-		while (i < p1->p_len && i < p2->p_len)
-		{
-			res->coeffs[i] = p1->coeffs[i] + p2->coeffs[i];
-			i++;
-		}
-		if (i < p1->p_len)
-		{
-			for (int j = i; j < p1->p_len; j++)
-				res->coeffs[j] = p1->coeffs[j];
-		}
-		else if (i < p2->p_len)
-		for (int j = i; j < p2->p_len; j++)
-			res->coeffs[j] = p2->coeffs[j];
-		
+		return summationByPolynomials(p1,p2);
 	}
-	return res;
+	return NULL;
 }
 //4:sub
 Polynomial* subtraction(char *name1, char *name2)
@@ -597,7 +602,35 @@ Polynomial* multiplication(char *name1, char *name2)
 		printf("unknown polynomial %s\n", name2);
 	else
 	{
+		res = (Polynomial*) malloc(sizeof(Polynomial));
+		res->p_len = (p1->p_len-1) + (p2->p_len-1) + 1;
+		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+
+		Polynomial **polArr = malloc(p1->p_len * sizeof(Polynomial));
+
+		for (int i = 0; i < p1->p_len; i++)
+		{
+			polArr[i] = (Polynomial*) malloc(sizeof(Polynomial));
+			
+			polArr[i]->coeffs = calloc(res->p_len,sizeof(float));
+			polArr[i]->p_len = i + (p2->p_len - 1) + 1;
+
+			for (int j = 0; j < p2->p_len; j++)
+			{
+				if (p1->coeffs[i] == 0)
+					break;
+				polArr[i]->coeffs[i+j] = p1->coeffs[i] * p2->coeffs[j];
+			}
+		}
+		
+		
+		for (int i = 0; i < p1->p_len; i++)
+		{
+			res = summationByPolynomials(res, polArr[i]);
+		}
+		
 	}
+	
 	return res;
 }
 //6:deriven
@@ -609,7 +642,13 @@ Polynomial* derivation(char *name)
 		printf("unknown polynomial %s\n", name);
 	else
 	{
-
+		res = malloc(sizeof(Polynomial));
+		res->coeffs = calloc(p1->p_len - 2, sizeof(float));
+		res->p_len = p1->p_len - 1;
+		for (int i = 0; i < res->p_len; i++)
+		{
+			res->coeffs[i] = p1->coeffs[i + 1] * (i + 1);
+		}
 	}
 	return res;
 }
@@ -622,13 +661,41 @@ float evaluation(char *name, float value)
 		printf("unknown polynomial %s\n", name);
 	else
 	{
-
+		for (int i = 0; i < p1->p_len; i++)
+		{
+			res += p1->coeffs[i] * pow(value, i);
+		}
 	}
 	return res;
 }
 //8:
 int createFromExisting(char* newName, char* pString)
 {
+	Polynomial *polToAdd = malloc(sizeof(Polynomial));
+
+	if (strncmp("der ", pString, 4) == 0)
+	{
+		//der op
+	}
+	else if (strstr(pString, "+"))
+	{
+		char **arr;
+		split(pString, '+', &arr);
+		summation(arr[0], arr[1]);
+	}
+	else if (strstr(pString, "-"))
+	{
+		char **arr;
+		split(pString,'-', &arr);
+		subtraction(arr[0], arr[1]);
+	}
+	else if (strstr(pString, "*"))
+	{
+		char **arr;
+		split(pString, '*', &arr);
+		multiplication(arr[0], arr[1]);
+	}
+
 	return 0;
 }
 
