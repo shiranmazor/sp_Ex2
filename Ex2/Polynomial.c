@@ -322,7 +322,7 @@ int getMaxDegree(char **arrP, int arr_len)
 		if (strchr(item, '^') != NULL)
 		{
 			int arr_len = split(item, '^', &arr);
-			current = *arr[arr_len - 1] - '0';
+			current = (int)atof(arr[arr_len - 1]);
 			if (current > max_deg)
 				max_deg = current;
 		}
@@ -503,12 +503,12 @@ void print(Polynomial *pol)
 				{
 					if (arr[i]>0)
 						if (arr[i] == 1)
-							printf(" + x^%d", arr[i], i);
+							printf(" + x^%d", i);
 						else
 							printf(" + %.2fx^%d", arr[i], i);
 					else
 						if (arr[i] ==-1)
-							printf(" -x^%d", arr[i], i);
+							printf(" -x^%d", i);
 						else
 							printf(" %.2fx^%d", arr[i], i);
 
