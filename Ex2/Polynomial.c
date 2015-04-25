@@ -130,46 +130,66 @@ char* removeSpaces(char* src)
 
 int checkPName(char *name)
 {
+	
+	char* newName = (char*)malloc(sizeof(name)*sizeof(char));
+	strcpy(newName, name);
+	removeSpaces(newName);
 	//check if start with a letter:
-	if (!isalpha(name[0]))
-		return 0;
-	for (int i = 0; i < strlen(name); i++)
+	if (!isalpha(newName[0]))
 	{
-		if (isalpha(name[i]) || isdigit(name[i]))
+		free(newName);
+		return 0;
+	}
+		
+	for (int i = 0; i < strlen(newName); i++)
+	{
+		if (isalpha(newName[i]) || isdigit(newName[i]))
 			continue;
 		else
+		{
+			free(newName);
 			return 0;
+		}
+			
 	}
 	//check if one of the commands are in varible name
-	if (strcmp(name, "der") == 0 || strcmp(name, "eval") == 0 || strcmp(name, "quit") == 0 || strcmp(name, "x") == 0)
+	if (strcmp(newName, "der") == 0 || strcmp(newName, "eval") == 0 || strcmp(newName, "quit") == 0 || strcmp(newName, "x") == 0)
+	{
+		free(newName);
 		return 0;
+	}
 
 	//name is o.k
+	free(newName);
 	return 1;
 }
 
 /*check if the string that given is in the form of polynom with x varible*/
 int isPolynomial(char* pString)
 {
+	char* newStr = (char*)malloc(sizeof(pString)*sizeof(char));
+	strcpy(newStr, pString);
+	removeSpaces(newStr);
 	int res = 0;
 	//check if the chars - x only /x and ^/ number digit exist in the string
 	//else return 0 - this mean polynom name
-	if (strcmp(pString, "x") == 0 || isNumber(pString) == 1)
+	if (strcmp(newStr, "x") == 0 || isNumber(newStr) == 1)
 		return 1;
-	if (strchr(pString, 'x') != NULL && strchr(pString, '^') != NULL)
+	if (strchr(newStr, 'x') != NULL && strchr(newStr, '^') != NULL)
 		return 1;
 	else
 	{
 		//check the form - '5x+4'/'3x'/
-		if (strchr(pString, 'x') != NULL)
+		if (strchr(newStr, 'x') != NULL)
 		{
 			char **arr = NULL;
-			int len = split(pString, 'x', &arr);
+			int len = split(newStr, 'x', &arr);
 			if (isNumber(arr[0]) == 1)
 				res = 1;
 			free(arr);
 		}
 		
+		free(newStr);
 		return res;
 	}
 	
@@ -213,7 +233,7 @@ char* replace(const char *s, char ch, const char *repl) {
 
 int executeOperation(char* input)
 {
-	removeSpaces(input);
+	
 
 	char **arr = NULL;
 	int arr_len = split(input, '=', &arr);
@@ -240,6 +260,7 @@ int executeOperation(char* input)
 	else if (checkPName(input) == 1)//printing!
 	{
 		//get  polynom in case of printing:
+		removeSpaces(input);
 		Polynomial *existPol = getPolynomial(input);
 		if (existPol != NULL)
 		{
@@ -252,6 +273,7 @@ int executeOperation(char* input)
 	}
 	else if (strchr(input, '+') != NULL)//+ exist without '=' - sum
 	{
+		removeSpaces(input);
 		char **arrSum = NULL;
 		int arr_len = split(input, '+', &arrSum);
 		Polynomial *res = summation(arrSum[0], arrSum[1]);
@@ -262,6 +284,7 @@ int executeOperation(char* input)
 	}
 	else if (strchr(input, '-') != NULL)//- exist without '=' - sub
 	{
+		removeSpaces(input);
 		char **arrSub = NULL;
 		int arr_len = split(input, '-', &arrSub);
 		Polynomial *res = subtraction(arrSub[0], arrSub[1]);
@@ -272,6 +295,7 @@ int executeOperation(char* input)
 	}
 	else if (strchr(input, '*') != NULL)// mul
 	{
+		removeSpaces(input);
 		char **arrMul = NULL;
 		int arr_len = split(input, '*', &arrMul);
 		Polynomial *res = multiplication(arrMul[0], arrMul[1]);
@@ -408,6 +432,8 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 //1:
 int createPolynomial(char *name, char* polynomialStr)
 {
+	removeSpaces(name);
+	removeSpaces(polynomialStr);
 	Polynomial *pol = getPolynomial(name);
 
 	if (pol == NULL) //polynom with that name doesn't exsist
