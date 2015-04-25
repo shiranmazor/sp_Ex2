@@ -284,6 +284,9 @@ int executeOperation(char* input)
 	{
 		memmove(input, input + 3, strlen(input) - 2);
 		Polynomial *res = derivation(input);
+		if (res != NULL)
+			print(res);
+		free(res);
 	}	
 	
 	free(arr);
