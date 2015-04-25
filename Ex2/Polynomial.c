@@ -523,10 +523,23 @@ void print(Polynomial *pol)
 Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 {
 	Polynomial *res = NULL;
-	res = malloc(sizeof(struct Polynomial));
+	res = malloc(sizeof(Polynomial));
 	res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
 	res->coeffs = (float*)calloc(res->p_len, sizeof(float));
-	int i = 0;
+
+	for (int i = 0; i < res->p_len; i++)
+	{
+		int toAdd1 = 0;
+		int toAdd2 = 0;
+
+		if (i < p1->p_len)
+			toAdd1 = p1->coeffs[i];
+		if (i < p2->p_len)
+			toAdd2 = p2->coeffs[i];
+
+		res->coeffs[i] = toAdd1 + toAdd2;
+	}
+	/*int i = 0;
 	while (i < p1->p_len && i < p2->p_len)
 	{
 		res->coeffs[i] = p1->coeffs[i] + p2->coeffs[i];
@@ -539,7 +552,7 @@ Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 	}
 	else if (i < p2->p_len)
 		for (int j = i; j < p2->p_len; j++)
-			res->coeffs[j] = p2->coeffs[j];
+			res->coeffs[j] = p2->coeffs[j];*/
 }
 //3:sum:
 Polynomial* summation(char *name1, char *name2)
@@ -671,30 +684,59 @@ float evaluation(char *name, float value)
 //8:
 int createFromExisting(char* newName, char* pString)
 {
-	Polynomial *polToAdd = malloc(sizeof(Polynomial));
+	Polynomial *polToUpdate = getPolynomial(newName);
+	Polynomial *polResult;
 
 	if (strncmp("der ", pString, 4) == 0)
 	{
-		//der op
+		polResult = derivation(pString);
 	}
 	else if (strstr(pString, "+"))
 	{
 		char **arr;
 		split(pString, '+', &arr);
-		summation(arr[0], arr[1]);
+		polResult = summation(arr[0], arr[1]);
 	}
 	else if (strstr(pString, "-"))
 	{
 		char **arr;
 		split(pString,'-', &arr);
-		subtraction(arr[0], arr[1]);
+		polResult = subtraction(arr[0], arr[1]);
 	}
 	else if (strstr(pString, "*"))
 	{
 		char **arr;
 		split(pString, '*', &arr);
-		multiplication(arr[0], arr[1]);
+		polResult = multiplication(arr[0], arr[1]);
 	}
+	else
+	{
+		return 1;
+	}
+	
+	if (polToUpdate == NULL)
+	{
+		polResult->name = malloc(strlen(newName) + 1);
+		strcpy(polResult->name, newName);
+		lastPolynomialPtr->next = polResult;
+		lastPolynomialPtr = polResult;
+		lastPolynomialPtr->next = NULL;
+		printf("created %s\n", newName);
+	}
+	else
+	{
+		polToUpdate->p_len = polResult->p_len;
+		free(polToUpdate->coeffs);
+		polToUpdate->coeffs = calloc(polResult->p_len,sizeof(float));
+		for (int i = 0; i < polToUpdate->p_len; i++)
+		{
+			polToUpdate->coeffs[i] = polResult->coeffs[i];
+		}
+		printf("updated %s\n", newName);
+		free(polResult);
+	}
+	
+
 
 	return 0;
 }
