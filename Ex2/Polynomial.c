@@ -7,6 +7,7 @@
 #include "Polynomial.h"
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 //define structures:
 struct Polynomial{
@@ -257,19 +258,31 @@ int executeOperation(char* input)
 				createFromExisting(pName, pString);
 		}	
 	}
-	else if (checkPName(input) == 1)//printing!
+	else if (strstr(input, " ")) //(checkPName(input) == 1)//printing!
 	{
-		//get  polynom in case of printing:
-		removeSpaces(input);
-		Polynomial *existPol = getPolynomial(input);
-		if (existPol != NULL)
+		char **arr2 = NULL;
+		int arr2_len = split(input, ' ', &arr2);
+		if (arr2_len > 1)
 		{
-			print(existPol);
+			if (!checkPName(arr2[1]))
+				return 1;
+
+			if (strcmp(arr2[0], "der") == 0)
+			{
+				Polynomial* res;
+				res = derivation(arr2[1]);
+				if (res != NULL)
+				{
+					print(res);
+					free(res);
+				}
+			}
+			else if (strcmp(arr2[0], "eval") == 0 && arr2_len == 3)
+			{
+				printf("%f\n",evaluation(arr2[1], atof(arr2[2])));
+			}
 		}
-		else
-		{
-			printf("unknown polynomial %s\n", input);
-		}
+
 	}
 	else if (strchr(input, '+') != NULL)//+ exist without '=' - sum
 	{
@@ -304,14 +317,20 @@ int executeOperation(char* input)
 		free(res);
 		free(arrMul);
 	}
-	else if (strstr(input, "der"))//driven
+	else if (checkPName(input) == 1) //print
 	{
-		memmove(input, input + 3, strlen(input) - 2);
-		Polynomial *res = derivation(input);
-		if (res != NULL)
-			print(res);
-		free(res);
-	}	
+		//get  polynom in case of printing:
+		removeSpaces(input);
+		Polynomial *existPol = getPolynomial(input);
+		if (existPol != NULL)
+		{
+			print(existPol);
+		}
+		else
+		{
+			printf("unknown polynomial %s\n", input);
+		}
+	}
 	
 	free(arr);
 	return 1;
