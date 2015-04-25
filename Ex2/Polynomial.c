@@ -234,8 +234,6 @@ char* replace(const char *s, char ch, const char *repl) {
 
 int executeOperation(char* input)
 {
-	
-
 	char **arr = NULL;
 	int arr_len = split(input, '=', &arr);
 	//arr_len should be 2
@@ -493,6 +491,8 @@ int createPolynomial(char *name, char* polynomialStr)
 void print(Polynomial *pol)
 {
 	float *arr = pol->coeffs;
+	if (pol->p_len == 0)
+		printf("%.2f", 0);
 	if (pol->p_len == 1 && arr[0] == 0)
 		printf("%.2f", arr[0]);
 	int first = 1;
@@ -704,7 +704,7 @@ Polynomial* derivation(char *name)
 	else
 	{
 		res = malloc(sizeof(Polynomial));
-		res->coeffs = calloc(p1->p_len - 2, sizeof(float));
+		res->coeffs = calloc(p1->p_len - 1, sizeof(float));
 		res->p_len = p1->p_len - 1;
 		for (int i = 0; i < res->p_len; i++)
 		{
