@@ -26,3 +26,6 @@ Polynomial *getPolynomial(char* name);
 char* replace(const char *s, char ch, const char *repl);
 int getMaxDegree(char **arrP, int arr_len);
 void ExtractPolynom(Polynomial* pol, char* polyStr);
+void cleanMemory(void);
+void reduceSpaces(char * str);
+int identifyPolOp(char* polynomStr);

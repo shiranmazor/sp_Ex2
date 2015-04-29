@@ -166,35 +166,21 @@ int checkPName(char *name)
 }
 
 /*check if the string that given is in the form of polynom with x varible*/
+
 int isPolynomial(char* pString)
 {
-	char* newStr = (char*)malloc(sizeof(pString)*sizeof(char));
-	strcpy(newStr, pString);
-	removeSpaces(newStr);
-	int res = 0;
-	//check if the chars - x only /x and ^/ number digit exist in the string
-	//else return 0 - this mean polynom name
-	if (strcmp(newStr, "x") == 0 || isNumber(newStr) == 1)
-		return 1;
-	if (strchr(newStr, 'x') != NULL && strchr(newStr, '^') != NULL)
-		return 1;
-	else
+
+	for (int i = 0; i < strlen(pString); i++)
 	{
-		//check the form - '5x+4'/'3x'/
-		if (strchr(newStr, 'x') != NULL)
-		{
-			char **arr = NULL;
-			int len = split(newStr, 'x', &arr);
-			if (isNumber(arr[0]) == 1)
-				res = 1;
-			free(arr);
-		}
-		
-		free(newStr);
-		return res;
+		if ((pString[i] ==  'x') || (pString[i] == ' ') || (pString[i] == '^') ||
+			(isdigit(pString[i])) || (pString[i] == '.') || (pString[i] == '+') || (pString[i] == '-') || (pString[i] == '\0'))
+			continue;
+		else // found invalid char
+			return 0;
 	}
-	
+	return 1;
 }
+
 
 /*check is the string contains only digit characters*/
 int isNumber(char* str)
@@ -250,20 +236,20 @@ int executeOperation(char* input)
 		else
 		{
 			//check if command 1 or 8
-			if (isPolynomial(pString))
+			if (isPolynomial(pString) == 1)
 				createPolynomial(pName, pString);
 			else
 				createFromExisting(pName, pString);
 		}	
 	}
-	else if (strstr(input, " ")) //(checkPName(input) == 1)//printing!
+	else if (strstr(input, " ")) //riven or eval
 	{
 		char **arr2 = NULL;
 		int arr2_len = split(input, ' ', &arr2);
 		if (arr2_len > 1)
 		{
-			if (!checkPName(arr2[1]))
-				return 1;
+			//if (!checkPName(arr2[1]))
+				//return 1;
 
 			if (strcmp(arr2[0], "der") == 0)
 			{
@@ -278,6 +264,19 @@ int executeOperation(char* input)
 			else if (strcmp(arr2[0], "eval") == 0 && arr2_len == 3)
 			{
 				printf("%f\n",evaluation(arr2[1], atof(arr2[2])));
+			}
+			else if (checkPName(arr2[0]) == 1)//printing command with spaces
+			{
+				//removeSpaces(arr2[0]);
+				Polynomial *existPol = getPolynomial(arr2[0]);
+				if (existPol != NULL)
+				{
+					print(existPol);
+				}
+				else
+				{
+					printf("unknown polynomial %s\n", arr2[0]);
+				}
 			}
 		}
 
@@ -334,6 +333,13 @@ int executeOperation(char* input)
 	return 1;
 }
 
+void reduceSpaces(char * str)
+{
+	while (strstr(str, "  "))
+	{
+		
+	}
+}
 /*
 Returns polynomial with the provided name, NULL if not exists
 */
@@ -759,6 +765,7 @@ int createFromExisting(char* newName, char* pString)
 	}
 	else
 	{
+
 		return 1;
 	}
 	
@@ -789,6 +796,23 @@ int createFromExisting(char* newName, char* pString)
 	return 0;
 }
 
+void cleanMemory(void)
+{
+	Polynomial *currentPolynomial = firstPolynomialPtr;
+	if (firstPolynomialPtr == NULL) //no polynomial was defined
+		return;
+	while (currentPolynomial != NULL)
+	{
+		Polynomial* tmp = currentPolynomial;
+		
+		free(currentPolynomial->coeffs);
+		free(currentPolynomial->name);
+
+		currentPolynomial = (*currentPolynomial).next;
+		free(tmp);
+	}
+
+}
 int main(void)
 {
 	lastPolynomialPtr = firstPolynomialPtr;
@@ -804,6 +828,7 @@ int main(void)
 		printf(" > ");
 		command = getString(stdin,10);
 	}
+	cleanMemory();
 	free(command);
 	return 0;
 }
