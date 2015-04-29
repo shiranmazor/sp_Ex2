@@ -8,6 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <assert.h>
 
 //define structures:
 struct Polynomial{
@@ -66,6 +67,12 @@ int split(const char *str, char c, char ***arr)
 	}
 	*arr = (char**)malloc(sizeof(char*)*count);
 	if (*arr == NULL)
+	{
+		perror("memory allocation while spiliting has failed!");
+		assert(arr != NULL);
+	}
+		
+	if (*arr == NULL)
 		exit(1);
 
 	p = str;
@@ -75,6 +82,12 @@ int split(const char *str, char c, char ***arr)
 		if (*p == c)
 		{
 			(*arr)[i] = (char*)malloc(sizeof(char)*token_len);
+			if ((*arr)[i] == NULL)
+			{
+				perror("memory allocation while spiliting has failed!");
+				assert((*arr)[i] != NULL);
+			}
+				
 			if ((*arr)[i] == NULL)
 				exit(1);
 
@@ -86,6 +99,12 @@ int split(const char *str, char c, char ***arr)
 	}
 
 	(*arr)[i] = (char*)malloc(sizeof(char)*token_len);
+	if ((*arr)[i] == NULL)
+	{
+		perror("memory allocation while spiliting has failed!");
+		assert((*arr)[i] != NULL);
+	}
+		
 	if ((*arr)[i] == NULL)
 		exit(1);
 
@@ -133,6 +152,12 @@ int checkPName(char *name)
 {
 	
 	char* newName = (char*)malloc(sizeof(name)*sizeof(char));
+	if (newName == NULL)
+	{
+		perror("Error while allocation memory  in checkPName");
+		assert(newName != NULL);
+	}
+		
 	strcpy(newName, name);
 	removeSpaces(newName);
 	//check if start with a letter:
@@ -204,6 +229,12 @@ char* replace(const char *s, char ch, const char *repl) {
 
 	size_t rlen = strlen(repl);
 	char *res = malloc(strlen(s) + (rlen - 1)*count + 1);
+	if (res == NULL)
+	{
+		perror("memory allocation in replace has failed!");
+		assert(res != NULL);
+	}
+		
 	char *ptr = res;
 	for (t = s; *t; t++) {
 		if (*t == ch) {
@@ -463,6 +494,12 @@ int createPolynomial(char *name, char* polynomialStr)
 	{
 		//create new
 		pol = malloc(sizeof(struct Polynomial));
+		if (pol == NULL)
+		{
+			perror("failed  to allocate memory in createPolynomial function");
+			assert(pol != NULL);
+
+		}
 	
 		if (firstPolynomialPtr == NULL)
 		{
@@ -478,6 +515,11 @@ int createPolynomial(char *name, char* polynomialStr)
 		lastPolynomialPtr->next = NULL;
 	
 		pol->name = malloc(strlen(name) + 1);
+		if (pol->name == NULL)
+		{
+			perror("failed to allocate memory in createing polynomial name");
+			assert(pol->name != NULL);
+		}
 		strcpy(pol->name, name);
 		printf("created %s\n", name);
 			
@@ -578,6 +620,11 @@ Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 {
 	Polynomial *res = NULL;
 	res = malloc(sizeof(Polynomial));
+	if (res == NULL)
+	{
+		perror("Error when allocating memory in summation");
+		assert(res != NULL);
+	}
 	res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
 	res->coeffs = (float*)calloc(res->p_len, sizeof(float));
 
@@ -637,6 +684,11 @@ Polynomial* subtraction(char *name1, char *name2)
 	else
 	{
 		res = malloc(sizeof(struct Polynomial));
+		if (res == NULL)
+		{
+			perror("Failed to allocate memory in subtraction");
+			assert(res != NULL);
+		}
 		res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
 		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
 		int i = 0;
@@ -678,6 +730,11 @@ Polynomial* multiplication(char *name1, char *name2)
 		for (int i = 0; i < p1->p_len; i++)
 		{
 			polArr[i] = (Polynomial*) malloc(sizeof(Polynomial));
+			if (polArr[i] == NULL)
+			{
+				perror("failed to allocate memory in mul func");
+				assert(polArr[i] != NULL);
+			}
 			
 			polArr[i]->coeffs = calloc(res->p_len,sizeof(float));
 			polArr[i]->p_len = i + (p2->p_len - 1) + 1;
@@ -710,6 +767,11 @@ Polynomial* derivation(char *name)
 	else
 	{
 		res = malloc(sizeof(Polynomial));
+		if (res == NULL)
+		{
+			perror("failed to allocated memory in driven");
+			assert(res != NULL);
+		}
 		res->coeffs = calloc(p1->p_len - 1, sizeof(float));
 		res->p_len = p1->p_len - 1;
 		for (int i = 0; i < res->p_len; i++)
@@ -772,6 +834,11 @@ int createFromExisting(char* newName, char* pString)
 	if (polToUpdate == NULL)
 	{
 		polResult->name = malloc(strlen(newName) + 1);
+		if (polResult->name == NULL)
+		{
+			perror("Failed to allocate memory in create from existing function");
+			assert(polResult->name != NULL);
+		}
 		strcpy(polResult->name, newName);
 		lastPolynomialPtr->next = polResult;
 		lastPolynomialPtr = polResult;
