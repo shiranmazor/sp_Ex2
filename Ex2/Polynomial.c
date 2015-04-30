@@ -746,13 +746,14 @@ Polynomial* multiplication(char *name1, char *name2)
 				polArr[i]->coeffs[i+j] = p1->coeffs[i] * p2->coeffs[j];
 			}
 		}
+
 		
 		
 		for (int i = 0; i < p1->p_len; i++)
 		{
 			res = summationByPolynomials(res, polArr[i]);
 		}
-		
+		free(polArr);
 	}
 	
 	return res;
