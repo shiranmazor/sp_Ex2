@@ -946,7 +946,10 @@ int createFromExisting(char* newName, char* pString)
 
 	if (strncmp("der ", pString, 4) == 0)
 	{
-		polResult = derivation(pString);
+		char *polName = malloc(sizeof(char)*strlen(pString - 4 + 1));
+		strncpy(polName, pString + 4, strlen(pString) - 4+1);
+		polResult = derivation(polName);
+		free(polName);
 	}
 	else if (strstr(pString, "+"))
 	{
