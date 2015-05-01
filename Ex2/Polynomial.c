@@ -974,6 +974,7 @@ int createFromExisting(char* newName, char* pString)
 	
 	if (polToUpdate == NULL)
 	{
+		//polResult = malloc(sizeof(Polynomial));
 		polResult->name = malloc(strlen(newName) + 1);
 		if (polResult->name == NULL)
 		{
