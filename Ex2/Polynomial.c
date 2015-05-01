@@ -296,7 +296,7 @@ int executeOperation(char* input)
 			}
 			else if (strcmp(arr2[0], "eval") == 0 && arr2_len == 3)
 			{
-				printf("%f\n",evaluation(arr2[1], atof(arr2[2])));
+				printf("%.2f\n",evaluation(arr2[1], atof(arr2[2])));
 			}
 			else if (checkPName(arr2[0]) == 1)//printing command with spaces
 			{
@@ -853,8 +853,9 @@ Polynomial* multiplication(char *name1, char *name2)
 	else
 	{
 		res = (Polynomial*) malloc(sizeof(Polynomial));
-		res->p_len = (p1->p_len-1) + (p2->p_len-1) + 1;
+		res->p_len = p1->p_len * p2->p_len;
 		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+		res->degrees = (int*)calloc(res->p_len, sizeof(int));
 
 		Polynomial **polArr = malloc(p1->p_len * sizeof(Polynomial));
 
@@ -867,23 +868,28 @@ Polynomial* multiplication(char *name1, char *name2)
 				assert(polArr[i] != NULL);
 			}
 			
-			polArr[i]->coeffs = calloc(res->p_len,sizeof(float));
-			polArr[i]->p_len = i + (p2->p_len - 1) + 1;
+			polArr[i]->p_len = p2->p_len;
+			polArr[i]->coeffs = calloc(polArr[i]->p_len, sizeof(float));
+			polArr[i]->degrees = calloc(polArr[i]->p_len, sizeof(int));
+			
 
 			for (int j = 0; j < p2->p_len; j++)
 			{
 				if (p1->coeffs[i] == 0)
-					break;
-				polArr[i]->coeffs[i+j] = p1->coeffs[i] * p2->coeffs[j];
+				{
+					break; //todo update p_len accordingly
+					polArr[i]->p_len = j;
+				}
+				polArr[i]->coeffs[j] = p1->coeffs[i] * p2->coeffs[j];
+				polArr[i]->degrees[j] = p1->degrees[i] + p2->degrees[j];
 			}
 		}
-
-		
 		
 		for (int i = 0; i < p1->p_len; i++)
 		{
 			res = summationByPolynomials(res, polArr[i]);
 		}
+
 		free(polArr);
 	}
 	
@@ -904,11 +910,14 @@ Polynomial* derivation(char *name)
 			perror("failed to allocated memory in driven");
 			assert(res != NULL);
 		}
-		res->coeffs = calloc(p1->p_len - 1, sizeof(float));
-		res->p_len = p1->p_len - 1;
+		res->p_len = p1->p_len;
+		res->coeffs = calloc(res->p_len, sizeof(float));
+		res->degrees = calloc(res->p_len, sizeof(int));
+		
 		for (int i = 0; i < res->p_len; i++)
 		{
-			res->coeffs[i] = p1->coeffs[i + 1] * (i + 1);
+			res->coeffs[i] = p1->coeffs[i] * p1->degrees[i];//(i + 1);
+			res->degrees[i] = p1->degrees[i] - 1;
 		}
 	}
 	return res;
@@ -924,7 +933,7 @@ float evaluation(char *name, float value)
 	{
 		for (int i = 0; i < p1->p_len; i++)
 		{
-			res += p1->coeffs[i] * pow(value, i);
+			res += p1->coeffs[i] * pow(value, p1->degrees[i]);
 		}
 	}
 	return res;
