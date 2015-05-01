@@ -28,4 +28,5 @@ int getMaxDegree(char **arrP, int arr_len);
 void ExtractPolynom(Polynomial* pol, char* polyStr);
 void cleanMemory(void);
 void reduceSpaces(char * str);
-int identifyPolOp(char* polynomStr);
+int insertToPolynomArray(Polynomial* pol, int degree, float coeff, int len,int currLen);
+int binsearch(int *arr, int size, int key);

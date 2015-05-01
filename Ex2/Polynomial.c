@@ -15,6 +15,8 @@ struct Polynomial{
 	char *name;
 	//the value in the fields is the coeff and the index is the degree
 	float *coeffs;
+	//array of degrees
+	int *degrees;
 	int p_len;
 	Polynomial *next;
 };
@@ -429,31 +431,37 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 	char **arrP = NULL;
 	int p_len = split(newP, '+', &arrP);
 	int max_deg = getMaxDegree(arrP, p_len);
-	pol->p_len = max_deg + 1;
+	pol->p_len = p_len;
 
-	//init coeffs array and alocate memory with zero values:
-	pol->coeffs = (float*)calloc(max_deg + 1, sizeof(float));
-	//let's fill in the coeffs array
+	//init coeffs and degree arrays and alocate memory with zero values:
+	pol->coeffs = (float*)malloc(p_len * sizeof(float));
+	pol->degrees = (int*)malloc(p_len *sizeof(int));
+	int curLen = 0;
+	//let's fill in the coeffs array 
+	//insert order - always the lowest degree will come to the first place
 	for (int i = 0; i < p_len; i++)
 	{
+		int degree = 0;
+		int coeff = 0;
+		//i - represent the place 
 		if (strchr(arrP[i], '^') != NULL)
 		{
 			//degree > 1
 			char **tmpArr = NULL;
 			int len = split(arrP[i], '^', &tmpArr);
-			int index = atof(tmpArr[len - 1]);//degree
-
+			degree = atof(tmpArr[len - 1]);//degree
+			
 			if (strcmp(tmpArr[0], "x") == 0)
-				pol->coeffs[index] = 1;
+				coeff = 1;
 			else if (strcmp(tmpArr[0], "-x") == 0)
-				pol->coeffs[index] = -1;
+				coeff = -1;
 			else
 			{
 				//split with x:
 				char **tmpArr2 = NULL;
 				int len = split(tmpArr[0], 'x', &tmpArr2);
 				float num = atof(tmpArr2[0]);
-				pol->coeffs[index] = num;
+				coeff = num;
 				free(tmpArr2);
 			}
 			free(tmpArr);
@@ -463,23 +471,83 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 			//in this case the item is - 'dx/x/d', d - digits
 			if (strchr(arrP[i], 'x') == NULL)
 			{
-				pol->coeffs[0] = atof(arrP[i]);
+				degree = 0;
+				coeff = atof(arrP[i]);
 			}
 			else if (strcmp(arrP[i], "-x") == 0)
-				pol->coeffs[1] = -1;
+			{
+				degree = 1;
+				coeff = -1;
+			}
+				
 			else if (strcmp(arrP[i], "x") == 0)
-				pol->coeffs[1] = 1;
+			{
+				degree = 1;
+				coeff = 1;
+			}
 			else  
 			{
+				degree = 1;
 				char **tmpArr = NULL;
 				int len = split(arrP[i], 'x', &tmpArr);
-				pol->coeffs[1] = atof(tmpArr[0]);
+				coeff = atof(tmpArr[0]);
 				free(tmpArr);
 			}
 
 		}
+		//insert coeff and degree in increase order by degree
+		
+		if (i == 0)
+		{
+			curLen = insertToPolynomArray(pol, degree, coeff, p_len, curLen);
+		}
+		else
+			curLen = insertToPolynomArray(pol, degree, coeff, p_len, curLen);
+		
 	}
+
 	free(arrP);
+}
+
+int binsearch(int *arr, int size, int key)
+{
+	int low = 0, high = size - 1;
+
+	if (key > arr[high]) return size;
+
+	while (high > low) {
+		int mid = (low + high) / 2;
+		if (arr[mid] > key) high = mid;
+		else low = mid + 1;
+	}
+
+	return low;
+}
+
+int insertToPolynomArray(Polynomial* pol,int degree, float coeff, int len, int currLen)
+{
+	if (currLen == 0)
+	{
+		//first time
+		pol->degrees[0] = degree;
+		pol->coeffs[0] = coeff;
+		currLen++;
+	}
+	else
+	{
+		int pos = binsearch(pol->degrees, currLen, degree);
+		int i;
+		for (i = currLen - 1; i >= pos; --i)
+		{
+			pol->degrees[i + 1] = pol->degrees[i];
+			pol->coeffs[i + 1] = pol->coeffs[i];
+		}
+		pol->degrees[pos] = degree;
+		pol->coeffs[pos] = coeff;
+		currLen++;
+	}
+	return currLen;
+	
 }
 
 //program functions
@@ -538,78 +606,76 @@ int createPolynomial(char *name, char* polynomialStr)
 //2:print
 void print(Polynomial *pol)
 {
-	float *arr = pol->coeffs;
+	float *arrC = pol->coeffs;
+	int *arrD = pol->degrees;
 	if (pol->p_len == 0)
 		printf("%.2f", 0);
-	if (pol->p_len == 1 && arr[0] == 0)
-		printf("%.2f", arr[0]);
+	if (pol->p_len == 1 && arrC[0] == 0)
+		printf("%.2f", arrC[0]);
 	int first = 1;
 
 	for (int i = 0; i < pol->p_len; i++)
 	{
-		if (arr[i] != 0)
+		if (arrC[i] == 0)
+			continue;
+		if (arrD[i] == 0)
 		{
-			if (i == 0)
+			//print number only
+			printf("%.2f", arrC[i]);
+			first = 0;
+		}
+		else if (arrD[i] == 1)
+		{
+			if (first == 1)
 			{
-				//print number only
-				printf("%.2f", arr[i]);
-				first = 0;
-			}
-			else if (i == 1)
-			{
-				if (first == 1)
-				{
-					if (arr[i] == 1)
-						printf("x");
-					else if (arr[i] == -1)
-						printf("-x");
-					else
-						printf("%.2fx", arr[i]);
-					first = 0;
-				}
+				if (arrC[i] == 1)
+					printf("x");
+				else if (arrC[i] == -1)
+					printf("-x");
 				else
-				{
-					if (arr[i]>0)
-						if (arr[i] == 1)
-							printf(" +x");
-						else
-							printf(" + %.2fx", arr[i]);
-					else
-						if (arr[i] == -1)
-							printf(" -x");
-						else
-							printf(" %.2fx", arr[i]);
-				}
-					
+					printf("%.2fx", arrC[i]);
+				first = 0;
 			}
 			else
 			{
-				//i>2
-				if (first == 1)
-				{
-					if (arr[i] == 1)
-						printf("x^%d", i);
-					else if (arr[i] == -1)
-						printf("-x^%d", i);
-					else
-						printf("%.2fx^%d", arr[i], i);
-					first = 0;
-				}
+				if (arrC[i] > 0)
+				if (arrC[i] == 1)
+					printf(" +x");
 				else
-				{
-					if (arr[i]>0)
-						if (arr[i] == 1)
-							printf(" + x^%d", i);
-						else
-							printf(" + %.2fx^%d", arr[i], i);
-					else
-						if (arr[i] ==-1)
-							printf(" -x^%d", i);
-						else
-							printf(" %.2fx^%d", arr[i], i);
+					printf(" + %.2fx", arrC[i]);
+				else
+				if (arrC[i] == -1)
+					printf(" -x");
+				else
+					printf(" %.2fx", arrC[i]);
+			}
+		}
+		else// deg > 1
+		{
+			//i>2
+			if (first == 1)
+			{
+				if (arrC[i] == 1)
+					printf("x^%d", arrD[i]);
+				else if (arrC[i] == -1)
+					printf("-x^%d", i);
+				else
+					printf("%.2fx^%d", arrC[i], arrD[i]);
+				first = 0;
+			}
+			else
+			{
+				if (arrC[i] > 0)
+				if (arrC[i] == 1)
+					printf(" + x^%d", arrD[i]);
+				else
+					printf(" + %.2fx^%d", arrC[i], arrD[i]);
+				else
+				if (arrC[i] == -1)
+					printf(" -x^%d", arrD[i]);
+				else
+					printf(" %.2fx^%d", arrC[i], arrD[i]);
 
-				}
-				
 			}
 		}
 	}
@@ -625,36 +691,63 @@ Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 		perror("Error when allocating memory in summation");
 		assert(res != NULL);
 	}
-	res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
-	res->coeffs = (float*)calloc(res->p_len, sizeof(float));
-
-	for (int i = 0; i < res->p_len; i++)
+	float* coeffs = (float*)calloc(p1->p_len+p2->p_len, sizeof(float));
+	int* degs = (int*)calloc(p1->p_len + p2->p_len, sizeof(int));
+	
+	//perform merge sort:
+	int i = 0; int j = 0; int k = 0;
+	while (i < p1->p_len && j < p2->p_len)
 	{
-		int toAdd1 = 0;
-		int toAdd2 = 0;
-
-		if (i < p1->p_len)
-			toAdd1 = p1->coeffs[i];
-		if (i < p2->p_len)
-			toAdd2 = p2->coeffs[i];
-
-		res->coeffs[i] = toAdd1 + toAdd2;
+		if (p1->degrees[i] < p2->degrees[j])
+		{
+			degs[k] = p1->degrees[i];
+			coeffs[k] = p1->coeffs[i];
+			i++;
+		}
+		else
+		{
+			if (p1->degrees[i] == p2->degrees[j])
+			{
+				degs[k] = p1->degrees[i];
+				coeffs[k] = p1->coeffs[i] + p2->coeffs[j];
+				i++;
+				j++;
+			}
+			else
+			{
+				degs[k] = p2->degrees[j];
+				coeffs[k] = p2->coeffs[j];
+				j++;
+			}
+		}
+		k++;
 	}
-	/*int i = 0;
-	while (i < p1->p_len && i < p2->p_len)
+	while (i < p1->p_len)
 	{
-		res->coeffs[i] = p1->coeffs[i] + p2->coeffs[i];
+		degs[k] = p1->degrees[i];
+		coeffs[k] = p1->coeffs[i];
 		i++;
+		k++;
 	}
-	if (i < p1->p_len)
+	while (j < p2->p_len)
 	{
-		for (int j = i; j < p1->p_len; j++)
-			res->coeffs[j] = p1->coeffs[j];
+		degs[k] = p2->degrees[j];
+		coeffs[k] = p2->coeffs[j];
+		j++;
+		k++;
 	}
-	else if (i < p2->p_len)
-		for (int j = i; j < p2->p_len; j++)
-			res->coeffs[j] = p2->coeffs[j];*/
+	//insert to res:
+	res->p_len = k;
+	res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+	res->degrees = (int*)calloc(res->p_len, sizeof(int));
+	for (int i = 0; i < k; i++)
+	{
+		res->coeffs[i] = coeffs[i];
+		res->degrees[i] = degs[i];
+	}
+	return res;
 }
+
 //3:sum:
 Polynomial* summation(char *name1, char *name2)
 {
@@ -689,22 +782,60 @@ Polynomial* subtraction(char *name1, char *name2)
 			perror("Failed to allocate memory in subtraction");
 			assert(res != NULL);
 		}
-		res->p_len = p1->p_len > p2->p_len ? p1->p_len : p2->p_len;
-		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
-		int i = 0;
-		while (i < p1->p_len && i < p2->p_len)
+		float* coeffs = (float*)calloc(p1->p_len + p2->p_len, sizeof(float));
+		int* degs = (int*)calloc(p1->p_len + p2->p_len, sizeof(int));
+
+		//perform merge sort:
+		int i = 0; int j = 0; int k = 0;
+		while (i < p1->p_len && j < p2->p_len)
 		{
-			res->coeffs[i] = p1->coeffs[i] - p2->coeffs[i];
+			if (p1->degrees[i] < p2->degrees[j])
+			{
+				degs[k] = p1->degrees[i];
+				coeffs[k] = p1->coeffs[i];
+				i++;
+			}
+			else
+			{
+				if (p1->degrees[i] == p2->degrees[j])
+				{
+					degs[k] = p1->degrees[i];
+					coeffs[k] = p1->coeffs[i] - p2->coeffs[j];
+					i++;
+					j++;
+				}
+				else
+				{
+					degs[k] = p2->degrees[j];
+					coeffs[k] = p2->coeffs[j] * (-1);
+					j++;
+				}
+			}
+			k++;
+		}
+		while (i < p1->p_len)
+		{
+			degs[k] = p1->degrees[i];
+			coeffs[k] = p1->coeffs[i];
 			i++;
+			k++;
 		}
-		if (i < p1->p_len)
+		while (j < p2->p_len)
 		{
-			for (int j = i; j < p1->p_len; j++)
-				res->coeffs[j] = p1->coeffs[j];
+			degs[k] = p2->degrees[j];
+			coeffs[k] = p2->coeffs[j]*(-1);
+			j++;
+			k++;
 		}
-		else if (i < p2->p_len)
-		for (int j = i; j < p2->p_len; j++)
-			res->coeffs[j] = p2->coeffs[j] * (-1);
+		//insert to res:
+		res->p_len = k;
+		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+		res->degrees = (int*)calloc(res->p_len, sizeof(int));
+		for (int i = 0; i < k; i++)
+		{
+			res->coeffs[i] = coeffs[i];
+			res->degrees[i] = degs[i];
+		}
 
 	}
 	return res;
@@ -874,6 +1005,7 @@ void cleanMemory(void)
 		Polynomial* tmp = currentPolynomial;
 		
 		free(currentPolynomial->coeffs);
+		free(currentPolynomial->degrees);
 		free(currentPolynomial->name);
 
 		currentPolynomial = (*currentPolynomial).next;
