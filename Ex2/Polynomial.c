@@ -1004,6 +1004,7 @@ void cleanMemory(void)
 		Polynomial* tmp = currentPolynomial;
 		
 		free(currentPolynomial->coeffs);
+		free(currentPolynomial->degrees);
 		free(currentPolynomial->name);
 
 		currentPolynomial = (*currentPolynomial).next;
