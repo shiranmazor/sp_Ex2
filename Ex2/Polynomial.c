@@ -1,6 +1,5 @@
 // Ex2.cpp : Defines the entry point for the console application.
 //
-
 #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,7 +52,7 @@ char* getString(FILE* fp, size_t size)
 	return str;
 }
 
-int split(const char *str, char c, char ***arr)
+int split(char *str, char c, char ***arr)
 {
 	int count = 1;
 	int token_len = 1;
@@ -137,7 +136,7 @@ int split(const char *str, char c, char ***arr)
 
 }
 
-char* removeSpaces(char* src)
+void removeSpaces(char* src)
 {
 	char* i = src;
 	char* j = src;
@@ -210,7 +209,7 @@ int isNumber(char* str)
 }
 
 /* return a new string with every instance of ch replaced by repl */
-char* replace(const char *s, char ch, const char *repl) {
+char* replace(char *s, char ch, char *repl) {
 	int count = 0;
 	const char *t;
 	for (t = s; *t; t++)
@@ -305,7 +304,7 @@ int executeOperation(char* input)
 	{
 		removeSpaces(input);
 		char **arrSum = NULL;
-		int arr_len = split(input, '+', &arrSum);
+		split(input, '+', &arrSum);
 		Polynomial *res = summation(arrSum[0], arrSum[1]);
 		if (res != NULL)
 		{
@@ -318,7 +317,7 @@ int executeOperation(char* input)
 	{
 		removeSpaces(input);
 		char **arrSub = NULL;
-		int arr_len = split(input, '-', &arrSub);
+		split(input, '-', &arrSub);
 		Polynomial *res = subtraction(arrSub[0], arrSub[1]);
 		if (res != NULL)
 		{
@@ -332,7 +331,7 @@ int executeOperation(char* input)
 	{
 		removeSpaces(input);
 		char **arrMul = NULL;
-		int arr_len = split(input, '*', &arrMul);
+		split(input, '*', &arrMul);
 		Polynomial *res = multiplication(arrMul[0], arrMul[1]);
 		if (res != NULL)
 		{
@@ -360,13 +359,6 @@ int executeOperation(char* input)
 	return 1;
 }
 
-void reduceSpaces(char * str)
-{
-	while (strstr(str, "  "))
-	{
-		
-	}
-}
 /*
 Returns polynomial with the provided name, NULL if not exists
 */
@@ -424,7 +416,6 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 	free(polyStr);
 	char **arrP = NULL;
 	int p_len = split(newP, '+', &arrP);
-	int max_deg = getMaxDegree(arrP, p_len);
 	pol->p_len = p_len;
 
 	//init coeffs and degree arrays and alocate memory with zero values:
@@ -453,7 +444,7 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 			{
 				//split with x:
 				char **tmpArr2 = NULL;
-				int len = split(tmpArr[0], 'x', &tmpArr2);
+				split(tmpArr[0], 'x', &tmpArr2);
 				float num = atof(tmpArr2[0]);
 				coeff = num;
 				free(tmpArr2);
@@ -484,7 +475,7 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 			{
 				degree = 1;
 				char **tmpArr = NULL;
-				int len = split(arrP[i], 'x', &tmpArr);
+				split(arrP[i], 'x', &tmpArr);
 				coeff = atof(tmpArr[0]);
 				free(tmpArr);
 			}
@@ -604,7 +595,7 @@ void print(Polynomial *pol)
 	float *arrC = pol->coeffs;
 	int *arrD = pol->degrees;
 	if (pol->p_len == 0)
-		printf("%.2f", 0);
+		printf("%.2f", 0.0);
 	if (pol->p_len == 1 && arrC[0] == 0)
 		printf("%.2f", arrC[0]);
 	int first = 1;
