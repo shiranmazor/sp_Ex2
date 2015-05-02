@@ -308,8 +308,10 @@ int executeOperation(char* input)
 		int arr_len = split(input, '+', &arrSum);
 		Polynomial *res = summation(arrSum[0], arrSum[1]);
 		if (res != NULL)
+		{
 			print(res);
-		free(res);
+			free(res);
+		}		
 		free(arrSum);
 	}
 	else if (strchr(input, '-') != NULL)//- exist without '=' - sub
@@ -319,8 +321,11 @@ int executeOperation(char* input)
 		int arr_len = split(input, '-', &arrSub);
 		Polynomial *res = subtraction(arrSub[0], arrSub[1]);
 		if (res != NULL)
+		{
 			print(res);
-		free(res);
+			free(res);
+		}
+			
 		free(arrSub);
 	}
 	else if (strchr(input, '*') != NULL)// mul
@@ -330,8 +335,10 @@ int executeOperation(char* input)
 		int arr_len = split(input, '*', &arrMul);
 		Polynomial *res = multiplication(arrMul[0], arrMul[1]);
 		if (res != NULL)
+		{
 			print(res);
-		free(res);
+			free(res);
+		}		
 		free(arrMul);
 	}
 	else if (checkPName(input) == 1) //print
@@ -429,7 +436,7 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 	for (int i = 0; i < p_len; i++)
 	{
 		int degree = 0;
-		int coeff = 0;
+		float coeff = 0.0;
 		//i - represent the place 
 		if (strchr(arrP[i], '^') != NULL)
 		{
@@ -459,6 +466,7 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 			if (strchr(arrP[i], 'x') == NULL)
 			{
 				degree = 0;
+
 				coeff = atof(arrP[i]);
 			}
 			else if (strcmp(arrP[i], "-x") == 0)
@@ -928,6 +936,7 @@ float evaluation(char *name, float value)
 //8:
 int createFromExisting(char* newName, char* pString)
 {
+	removeSpaces(newName);
 	Polynomial *polToUpdate = getPolynomial(newName);
 	Polynomial *polResult;
 
@@ -942,18 +951,24 @@ int createFromExisting(char* newName, char* pString)
 	{
 		char **arr;
 		split(pString, '+', &arr);
+		removeSpaces(arr[0]);
+		removeSpaces(arr[1]);
 		polResult = summation(arr[0], arr[1]);
 	}
 	else if (strstr(pString, "-"))
 	{
 		char **arr;
 		split(pString,'-', &arr);
+		removeSpaces(arr[0]);
+		removeSpaces(arr[1]);
 		polResult = subtraction(arr[0], arr[1]);
 	}
 	else if (strstr(pString, "*"))
 	{
 		char **arr;
 		split(pString, '*', &arr);
+		removeSpaces(arr[0]);
+		removeSpaces(arr[1]);
 		polResult = multiplication(arr[0], arr[1]);
 	}
 	else
@@ -961,6 +976,8 @@ int createFromExisting(char* newName, char* pString)
 
 		return 1;
 	}
+	if (polResult == NULL)//one of the operations failed
+		return 1;
 	
 	if (polToUpdate == NULL)
 	{
@@ -992,7 +1009,7 @@ int createFromExisting(char* newName, char* pString)
 	
 
 
-	return 0;
+	return 1;
 }
 
 void cleanMemory(void)

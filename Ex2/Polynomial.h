@@ -19,7 +19,6 @@ int executeOperation(char* input);
 int checkPName(char *name);
 int split(const char *str, char c, char ***arr);
 char* getString(size_t size);
-char* remove_spaces(char* src, char* target);
 int isPolynomial(char* pString);
 int isNumber(char* str);
 Polynomial *getPolynomial(char* name);
