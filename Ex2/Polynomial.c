@@ -152,43 +152,30 @@ char* removeSpaces(char* src)
 
 int checkPName(char *name)
 {
-	
-	char* newName = (char*)malloc(sizeof(name)*sizeof(char));
-	if (newName == NULL)
-	{
-		perror("Error while allocation memory  in checkPName");
-		assert(newName != NULL);
-	}
-		
-	strcpy(newName, name);
-	removeSpaces(newName);
 	//check if start with a letter:
-	if (!isalpha(newName[0]))
+	if (!isalpha(name[0]))
 	{
-		free(newName);
 		return 0;
 	}
 		
-	for (int i = 0; i < strlen(newName); i++)
+	for (int i = 0; i < strlen(name); i++)
 	{
-		if (isalpha(newName[i]) || isdigit(newName[i]))
+		if (isalpha(name[i]) || isdigit(name[i]) || name[i] == ' ')
 			continue;
 		else
 		{
-			free(newName);
 			return 0;
 		}
 			
 	}
 	//check if one of the commands are in varible name
-	if (strcmp(newName, "der") == 0 || strcmp(newName, "eval") == 0 || strcmp(newName, "quit") == 0 || strcmp(newName, "x") == 0)
+	if (strcmp(name, "der") == 0 || strcmp(name, "eval") == 0 || strcmp(name, "quit") == 0 || strcmp(name, "x") == 0
+		|| strcmp(name, "der ") == 0 || strcmp(name, "eval ") == 0 || strcmp(name, "quit ") == 0 || strcmp(name, "x ") == 0)
 	{
-		free(newName);
 		return 0;
 	}
 
 	//name is o.k
-	free(newName);
 	return 1;
 }
 
@@ -631,7 +618,7 @@ void print(Polynomial *pol)
 				if (arrC[i] == 1)
 					printf("x");
 				else if (arrC[i] == -1)
-					printf("-x");
+					printf("- x");
 				else
 					printf("%.2fx", arrC[i]);
 				first = 0;
@@ -640,12 +627,12 @@ void print(Polynomial *pol)
 			{
 				if (arrC[i] > 0)
 				if (arrC[i] == 1)
-					printf(" +x");
+					printf(" + x");
 				else
 					printf(" + %.2fx", arrC[i]);
 				else
 				if (arrC[i] == -1)
-					printf(" -x");
+					printf(" - x");
 				else
 					printf(" %.2fx", arrC[i]);
 			}
@@ -672,7 +659,7 @@ void print(Polynomial *pol)
 					printf(" + %.2fx^%d", arrC[i], arrD[i]);
 				else
 				if (arrC[i] == -1)
-					printf(" -x^%d", arrD[i]);
+					printf(" - x^%d", arrD[i]);
 				else
 					printf(" %.2fx^%d", arrC[i], arrD[i]);
 
