@@ -1,6 +1,6 @@
 // Ex2.cpp : Defines the entry point for the console application.
 //
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "Polynomial.h"
@@ -19,6 +19,20 @@ struct Polynomial{
 	int p_len;
 	Polynomial *next;
 };
+
+void freePolynomial(Polynomial *p)
+{
+	if (p != NULL)
+	{
+		if (p->coeffs != NULL)
+			free(p->coeffs);
+		if (p->degrees != NULL)
+			free(p->degrees);
+		if (p->name != NULL)
+			free(p->name);
+		free(p);
+	}
+}
 
 //linkied list help fields
 Polynomial *firstPolynomialPtr;
@@ -277,7 +291,7 @@ int executeOperation(char* input)
 				if (res != NULL)
 				{
 					print(res);
-					free(res);
+					freePolynomial(res);
 				}
 			}
 			else if (strcmp(arr2[0], "eval") == 0 && arr2_len == 3)
@@ -309,7 +323,7 @@ int executeOperation(char* input)
 		if (res != NULL)
 		{
 			print(res);
-			free(res);
+			freePolynomial(res);
 		}		
 		free(arrSum);
 	}
@@ -322,7 +336,7 @@ int executeOperation(char* input)
 		if (res != NULL)
 		{
 			print(res);
-			free(res);
+			freePolynomial(res);
 		}
 			
 		free(arrSub);
@@ -336,7 +350,7 @@ int executeOperation(char* input)
 		if (res != NULL)
 		{
 			print(res);
-			free(res);
+			freePolynomial(res);
 		}		
 		free(arrMul);
 	}
@@ -763,6 +777,8 @@ Polynomial* subtraction(char *name1, char *name2)
 	else
 	{
 		res = malloc(sizeof(struct Polynomial));
+		res->name = NULL;
+
 		if (res == NULL)
 		{
 			perror("Failed to allocate memory in subtraction");
@@ -824,6 +840,7 @@ Polynomial* subtraction(char *name1, char *name2)
 		}
 
 	}
+	
 	return res;
 }
 //5:mul:
@@ -839,6 +856,7 @@ Polynomial* multiplication(char *name1, char *name2)
 	else
 	{
 		res = (Polynomial*) malloc(sizeof(Polynomial));
+		res->name = NULL;
 		res->p_len = p1->p_len * p2->p_len;
 		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
 		res->degrees = (int*)calloc(res->p_len, sizeof(int));
@@ -848,6 +866,7 @@ Polynomial* multiplication(char *name1, char *name2)
 		for (int i = 0; i < p1->p_len; i++)
 		{
 			polArr[i] = (Polynomial*) malloc(sizeof(Polynomial));
+			polArr[i]->name = NULL;
 			if (polArr[i] == NULL)
 			{
 				perror("failed to allocate memory in mul func");
@@ -874,11 +893,13 @@ Polynomial* multiplication(char *name1, char *name2)
 		for (int i = 0; i < p1->p_len; i++)
 		{
 			res = summationByPolynomials(res, polArr[i]);
+			freePolynomial(polArr[i]);
 		}
 
 		free(polArr);
 	}
 	
+	res->name = NULL;
 	return res;
 }
 //6:deriven
@@ -995,7 +1016,7 @@ int createFromExisting(char* newName, char* pString)
 			polToUpdate->coeffs[i] = polResult->coeffs[i];
 		}
 		printf("updated %s\n", newName);
-		free(polResult);
+		freePolynomial(polResult);
 	}
 	
 
