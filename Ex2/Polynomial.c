@@ -34,6 +34,18 @@ void freePolynomial(Polynomial *p)
 	}
 }
 
+void freeArray(char** arrMul, int c)
+{
+	if (arrMul == NULL)
+		return;
+
+	for (int i = 0; i < c; ++i) {
+		if (arrMul[i]!=NULL)
+			free(arrMul[i]);
+	}
+	
+	free(arrMul);
+}
 //linkied list help fields
 Polynomial *firstPolynomialPtr;
 Polynomial *lastPolynomialPtr;
@@ -173,7 +185,7 @@ int checkPName(char *name)
 		
 	for (int i = 0; i < strlen(name); i++)
 	{
-		if (isalpha(name[i]) || isdigit(name[i]) || name[i] == ' ')
+		if (isalpha(name[i]) || isdigit(name[i]))
 			continue;
 		else
 		{
@@ -251,16 +263,38 @@ char* replace(char *s, char ch, char *repl) {
 	return res;
 }
 
+
+char *trimwhitespace(char *str)
+{
+	char *end;
+
+	// Trim leading space
+	while (isspace(*str)) str++;
+
+	if (*str == 0)  // All spaces?
+		return str;
+
+	// Trim trailing space
+	end = str + strlen(str) - 1;
+	while (end > str && isspace(*end)) end--;
+
+	// Write new null terminator
+	*(end + 1) = 0;
+
+	return str;
+}
+
 int executeOperation(char* input)
 {
+	trimwhitespace(input);
 	char **arr = NULL;
 	int arr_len = split(input, '=', &arr);
 	//arr_len should be 2
 	if (arr_len > 1)//found '=' char in command - create new/from existing
 	{	
 		//the command should be or cerate new or create from an existing object
-		char* pName = arr[0];
-		char* pString = arr[1];
+		char* pName = trimwhitespace(arr[0]);
+		char* pString = trimwhitespace(arr[1]);
 		if (!checkPName(pName))
 		{
 			printf("illegal variable name\n");
@@ -275,63 +309,24 @@ int executeOperation(char* input)
 				createFromExisting(pName, pString);
 		}	
 	}
-	else if (strstr(input, " ")) //riven or eval
-	{
-		char **arr2 = NULL;
-		int arr2_len = split(input, ' ', &arr2);
-		if (arr2_len > 1)
-		{
-			//if (!checkPName(arr2[1]))
-				//return 1;
-
-			if (strcmp(arr2[0], "der") == 0)
-			{
-				Polynomial* res;
-				res = derivation(arr2[1]);
-				if (res != NULL)
-				{
-					print(res);
-					freePolynomial(res);
-				}
-			}
-			else if (strcmp(arr2[0], "eval") == 0 && arr2_len == 3)
-			{
-				printf("%.2f\n",evaluation(arr2[1], atof(arr2[2])));
-			}
-			else if (checkPName(arr2[0]) == 1)//printing command with spaces
-			{
-				//removeSpaces(arr2[0]);
-				Polynomial *existPol = getPolynomial(arr2[0]);
-				if (existPol != NULL)
-				{
-					print(existPol);
-				}
-				else
-				{
-					printf("unknown polynomial %s\n", arr2[0]);
-				}
-			}
-		}
-
-	}
 	else if (strchr(input, '+') != NULL)//+ exist without '=' - sum
 	{
 		removeSpaces(input);
 		char **arrSum = NULL;
-		split(input, '+', &arrSum);
+		int arrLen = split(input, '+', &arrSum);
 		Polynomial *res = summation(arrSum[0], arrSum[1]);
 		if (res != NULL)
 		{
 			print(res);
 			freePolynomial(res);
 		}		
-		free(arrSum);
+		freeArray(arrSum, arrLen);
 	}
 	else if (strchr(input, '-') != NULL)//- exist without '=' - sub
 	{
 		removeSpaces(input);
 		char **arrSub = NULL;
-		split(input, '-', &arrSub);
+		int arrLen = split(input, '-', &arrSub);
 		Polynomial *res = subtraction(arrSub[0], arrSub[1]);
 		if (res != NULL)
 		{
@@ -339,20 +334,23 @@ int executeOperation(char* input)
 			freePolynomial(res);
 		}
 			
-		free(arrSub);
+		freeArray(arrSub,arrLen);
 	}
 	else if (strchr(input, '*') != NULL)// mul
 	{
 		removeSpaces(input);
 		char **arrMul = NULL;
-		split(input, '*', &arrMul);
+		int c = split(input, '*', &arrMul);
 		Polynomial *res = multiplication(arrMul[0], arrMul[1]);
 		if (res != NULL)
 		{
 			print(res);
 			freePolynomial(res);
-		}		
-		free(arrMul);
+		}
+
+
+		freeArray(arrMul, c);
+
 	}
 	else if (checkPName(input) == 1) //print
 	{
@@ -368,8 +366,49 @@ int executeOperation(char* input)
 			printf("unknown polynomial %s\n", input);
 		}
 	}
+	else if (strstr(input, " ")) //riven or eval
+	{
+		char **arr2 = NULL;
+		int arr2_len = split(input, ' ', &arr2);
+		if (arr2_len > 1)
+		{
+			//if (!checkPName(arr2[1]))
+			//return 1;
+
+			if (strcmp(arr2[0], "der") == 0)
+			{
+				Polynomial* res;
+				res = derivation(arr2[1]);
+				if (res != NULL)
+				{
+					print(res);
+					freePolynomial(res);
+				}
+			}
+			else if (strcmp(arr2[0], "eval") == 0 && arr2_len == 3)
+			{
+				printf("%.2f\n", evaluation(arr2[1], atof(arr2[2])));
+			}
+			else if (checkPName(arr2[0]) == 1)//printing command with spaces
+			{
+				//removeSpaces(arr2[0]);
+				Polynomial *existPol = getPolynomial(arr2[0]);
+				if (existPol != NULL)
+				{
+					print(existPol);
+				}
+				else
+				{
+					printf("unknown polynomial %s\n", arr2[0]);
+				}
+			}
+		}
+		freeArray(arr2, arr2_len);
+
+	}
 	
-	free(arr);
+	freeArray(arr,arr_len);
+	//free(arr);
 	return 1;
 }
 
@@ -417,7 +456,7 @@ int getMaxDegree(char **arrP, int arr_len)
 		}
 			
 	}
-	free(arr);
+	freeArray(arr,arr_len);
 	return max_deg;
 }
 
@@ -427,7 +466,7 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 	//extract coeffs and exponents
 
 	char *newP = replace(polyStr, '-', "+-");
-	free(polyStr);
+	//free(polyStr);
 	char **arrP = NULL;
 	int p_len = split(newP, '+', &arrP);
 	pol->p_len = p_len;
@@ -458,12 +497,12 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 			{
 				//split with x:
 				char **tmpArr2 = NULL;
-				split(tmpArr[0], 'x', &tmpArr2);
+				int arrLen = split(tmpArr[0], 'x', &tmpArr2);
 				float num = atof(tmpArr2[0]);
 				coeff = num;
-				free(tmpArr2);
+				freeArray(tmpArr2,arrLen);
 			}
-			free(tmpArr);
+			freeArray(tmpArr,len);
 		}
 		else//don't have '^' in it- degree =0/1
 		{
@@ -489,9 +528,9 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 			{
 				degree = 1;
 				char **tmpArr = NULL;
-				split(arrP[i], 'x', &tmpArr);
+				int len = split(arrP[i], 'x', &tmpArr);
 				coeff = atof(tmpArr[0]);
-				free(tmpArr);
+				freeArray(tmpArr, len);
 			}
 
 		}
@@ -506,7 +545,8 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 		
 	}
 
-	free(arrP);
+	free(newP);
+	freeArray(arrP,p_len);
 }
 
 int binsearch(int *arr, int size, int key)
@@ -691,6 +731,8 @@ Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 		perror("Error when allocating memory in summation");
 		assert(res != NULL);
 	}
+	res->name = NULL;
+
 	float* coeffs = (float*)calloc(p1->p_len+p2->p_len, sizeof(float));
 	int* degs = (int*)calloc(p1->p_len + p2->p_len, sizeof(int));
 	
@@ -745,6 +787,9 @@ Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 		res->coeffs[i] = coeffs[i];
 		res->degrees[i] = degs[i];
 	}
+
+	free(degs);
+	free(coeffs);
 	return res;
 }
 
@@ -838,8 +883,11 @@ Polynomial* subtraction(char *name1, char *name2)
 			res->coeffs[i] = coeffs[i];
 			res->degrees[i] = degs[i];
 		}
+		free(coeffs);
+		free(degs);
 
 	}
+	
 	
 	return res;
 }
@@ -855,7 +903,7 @@ Polynomial* multiplication(char *name1, char *name2)
 		printf("unknown polynomial %s\n", name2);
 	else
 	{
-		res = (Polynomial*) malloc(sizeof(Polynomial));
+		res = (struct Polynomial*) malloc(sizeof(struct Polynomial));
 		res->name = NULL;
 		res->p_len = p1->p_len * p2->p_len;
 		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
@@ -890,12 +938,15 @@ Polynomial* multiplication(char *name1, char *name2)
 			}
 		}
 		
+		
 		for (int i = 0; i < p1->p_len; i++)
 		{
+			Polynomial * toFreeLater = res;
 			res = summationByPolynomials(res, polArr[i]);
 			freePolynomial(polArr[i]);
+			freePolynomial(toFreeLater);
 		}
-
+		
 		free(polArr);
 	}
 	
@@ -906,12 +957,14 @@ Polynomial* multiplication(char *name1, char *name2)
 Polynomial* derivation(char *name)
 {
 	Polynomial *res = NULL;
+	
 	Polynomial* p1 = getPolynomial(name);
 	if (p1 == NULL)
 		printf("unknown polynomial %s\n", name);
 	else
 	{
 		res = malloc(sizeof(Polynomial));
+		res->name = NULL;
 		if (res == NULL)
 		{
 			perror("failed to allocated memory in driven");
@@ -954,7 +1007,7 @@ int createFromExisting(char* newName, char* pString)
 
 	if (strncmp("der ", pString, 4) == 0)
 	{
-		char *polName = malloc(sizeof(char)*strlen(pString - 4 + 1));
+		char *polName = malloc(sizeof(char)*(strlen(pString) - 4 + 1));
 		strncpy(polName, pString + 4, strlen(pString) - 4+1);
 		polResult = derivation(polName);
 		free(polName);
@@ -962,26 +1015,29 @@ int createFromExisting(char* newName, char* pString)
 	else if (strstr(pString, "+"))
 	{
 		char **arr;
-		split(pString, '+', &arr);
+		int arrLen = split(pString, '+', &arr);
 		removeSpaces(arr[0]);
 		removeSpaces(arr[1]);
 		polResult = summation(arr[0], arr[1]);
+		freeArray(arr, arrLen);
 	}
 	else if (strstr(pString, "-"))
 	{
 		char **arr;
-		split(pString,'-', &arr);
+		int arrLen = split(pString, '-', &arr);
 		removeSpaces(arr[0]);
 		removeSpaces(arr[1]);
 		polResult = subtraction(arr[0], arr[1]);
+		freeArray(arr, arrLen);
 	}
 	else if (strstr(pString, "*"))
 	{
 		char **arr;
-		split(pString, '*', &arr);
+		int arrLen = split(pString, '*', &arr);
 		removeSpaces(arr[0]);
 		removeSpaces(arr[1]);
 		polResult = multiplication(arr[0], arr[1]);
+		freeArray(arr, arrLen);
 	}
 	else
 	{
@@ -1032,13 +1088,11 @@ void cleanMemory(void)
 	while (currentPolynomial != NULL)
 	{
 		Polynomial* tmp = currentPolynomial;
-		
-		free(currentPolynomial->coeffs);
-		free(currentPolynomial->degrees);
-		free(currentPolynomial->name);
 
 		currentPolynomial = (*currentPolynomial).next;
-		free(tmp);
+
+		freePolynomial(tmp);
+		
 	}
 
 }
@@ -1053,7 +1107,8 @@ int main(void)
 	while (strcmp(command, "quit") != 0)
 	{
 		//int r = strchr(cmd_char, *c);
-		executeOperation(command);
+		executeOperation(trimwhitespace(command));
+		free(command);
 		printf(" > ");
 		command = getString(stdin,10);
 	}
