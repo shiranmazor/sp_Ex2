@@ -92,31 +92,26 @@ int split(char *str, char c, char ***arr)
 			count++;
 		p++;
 	}
-	*arr = (char**)malloc(sizeof(char*)*count);
+	int num = sizeof(char*)*count;
+	*arr = (char**)malloc(num);
 	if (*arr == NULL)
 	{
 		perror("memory allocation while spiliting has failed!");
 		assert(arr != NULL);
 	}
-		
-	if (*arr == NULL)
-		exit(1);
-
 	p = str;
 	//2 - allocating arr space
 	while (*p != '\0')
 	{
 		if (*p == c)
 		{
-			(*arr)[i] = (char*)malloc(sizeof(char)*token_len);
+			int num2 = sizeof(char)*token_len;
+			(*arr)[i] = (char*)malloc(num2);
 			if ((*arr)[i] == NULL)
 			{
 				perror("memory allocation while spiliting has failed!");
 				assert((*arr)[i] != NULL);
 			}
-				
-			if ((*arr)[i] == NULL)
-				exit(1);
 
 			token_len = 0;
 			i++;
@@ -125,15 +120,13 @@ int split(char *str, char c, char ***arr)
 		token_len++;
 	}
 
-	(*arr)[i] = (char*)malloc(sizeof(char)*token_len);
+	int num3 = sizeof(char)*token_len;
+	(*arr)[i] = (char*)malloc(num3);
 	if ((*arr)[i] == NULL)
 	{
 		perror("memory allocation while spiliting has failed!");
 		assert((*arr)[i] != NULL);
 	}
-		
-	if ((*arr)[i] == NULL)
-		exit(1);
 
 	i = 0;
 	p = str;
@@ -157,7 +150,6 @@ int split(char *str, char c, char ***arr)
 
 	*t = '\0';
 	i++;
-	t = ((*arr)[i]);
 	return count;
 
 }
