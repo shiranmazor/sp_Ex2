@@ -1066,7 +1066,9 @@ int createFromExisting(char* newName, char* pString)
 	{
 		polToUpdate->p_len = polResult->p_len;
 		free(polToUpdate->coeffs);
+		free(polToUpdate->degrees);
 		polToUpdate->coeffs = calloc(polResult->p_len,sizeof(float));
+		polToUpdate->degrees = calloc(polResult->p_len, sizeof(int));
 		for (int i = 0; i < polToUpdate->p_len; i++)
 		{
 			polToUpdate->coeffs[i] = polResult->coeffs[i];
