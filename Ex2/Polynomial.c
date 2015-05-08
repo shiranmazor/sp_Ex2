@@ -645,11 +645,15 @@ void print(Polynomial *pol)
 	if (pol->p_len == 1 && arrC[0] == 0)
 		printf("%.2f", arrC[0]);
 	int first = 1;
-
+	int countZero = 0;
 	for (int i = 0; i < pol->p_len; i++)
 	{
 		if (arrC[i] == 0)
+		{
+			countZero++;
 			continue;
+		}
+			
 		if (arrD[i] == 0)
 		{
 			//print number only
@@ -711,6 +715,8 @@ void print(Polynomial *pol)
 			}
 		}
 	}
+	if (countZero == pol->p_len)
+		printf("%.2f", 0.0);
 	printf("\n");
 }
 
@@ -813,6 +819,7 @@ Polynomial* subtraction(char *name1, char *name2)
 		printf("unknown polynomial %s\n", name2);
 	else
 	{
+		
 		res = malloc(sizeof(struct Polynomial));
 		res->name = NULL;
 
@@ -820,6 +827,15 @@ Polynomial* subtraction(char *name1, char *name2)
 		{
 			perror("Failed to allocate memory in subtraction");
 			assert(res != NULL);
+		}
+		if (p1 == p2)
+		{
+			res->p_len = 1;
+			res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+			res->degrees = (int*)calloc(res->p_len, sizeof(int));
+			res->coeffs[0] = 0.0;
+			res->degrees[0] = 0;
+			return res;
 		}
 		float* coeffs = (float*)calloc(p1->p_len + p2->p_len, sizeof(float));
 		int* degs = (int*)calloc(p1->p_len + p2->p_len, sizeof(int));
