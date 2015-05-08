@@ -20,6 +20,9 @@ struct Polynomial{
 	Polynomial *next;
 };
 
+/*
+frees Polynomial memory including it's members 
+*/
 void freePolynomial(Polynomial *p)
 {
 	if (p != NULL)
@@ -34,6 +37,9 @@ void freePolynomial(Polynomial *p)
 	}
 }
 
+/*
+free two-dimensions arrays
+*/
 void freeArray(char** arrMul, int c)
 {
 	if (arrMul == NULL)
@@ -46,6 +52,7 @@ void freeArray(char** arrMul, int c)
 	
 	free(arrMul);
 }
+
 //linkied list help fields
 Polynomial *firstPolynomialPtr;
 Polynomial *lastPolynomialPtr;
@@ -167,8 +174,10 @@ void removeSpaces(char* src)
 	*i = 0;
 }
 
+//chech that name is a valid polinom name
 int checkPName(char *name)
 {
+	trimwhitespace(name);
 	//check if start with a letter:
 	if (!isalpha(name[0]))
 	{
@@ -256,6 +265,7 @@ char* replace(char *s, char ch, char *repl) {
 }
 
 
+//removes any leading/trailing whitespaces
 char *trimwhitespace(char *str)
 {
 	char *end;
@@ -279,6 +289,7 @@ char *trimwhitespace(char *str)
 int executeOperation(char* input)
 {
 	trimwhitespace(input);
+
 	char **arr = NULL;
 	int arr_len = split(input, '=', &arr);
 	//arr_len should be 2
@@ -370,7 +381,7 @@ int executeOperation(char* input)
 			if (strcmp(arr2[0], "der") == 0)
 			{
 				Polynomial* res;
-				res = derivation(arr2[1]);
+				res = derivation(arr2[arr2_len-1]);
 				if (res != NULL)
 				{
 					print(res);
@@ -409,6 +420,7 @@ Returns polynomial with the provided name, NULL if not exists
 */
 Polynomial* getPolynomial(char* name)
 {
+	trimwhitespace(name);
 	Polynomial *currentPolynomial = firstPolynomialPtr;
 	if (firstPolynomialPtr == NULL) //no polynomial was defined
 		return NULL;	
@@ -626,6 +638,9 @@ int createPolynomial(char *name, char* polynomialStr)
 	}
 	else
 	{
+		//free arrays since we are going to allocate new arrays shortly.
+		free(pol->coeffs);
+		free(pol->degrees);
 		printf("updated %s\n",name);
 		//update existing - pol contains the existing polynomial
 	}
@@ -726,6 +741,7 @@ void print(Polynomial *pol)
 	printf("\n");
 }
 
+//sum two Polynomials
 Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 {
 	Polynomial *res = NULL;
