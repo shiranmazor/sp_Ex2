@@ -1070,6 +1070,7 @@ int createFromExisting(char* newName, char* pString)
 		for (int i = 0; i < polToUpdate->p_len; i++)
 		{
 			polToUpdate->coeffs[i] = polResult->coeffs[i];
+			polToUpdate->degrees[i] = polResult->degrees[i];
 		}
 		printf("updated %s\n", newName);
 		freePolynomial(polResult);
