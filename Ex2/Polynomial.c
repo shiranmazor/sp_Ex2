@@ -643,7 +643,13 @@ void print(Polynomial *pol)
 	if (pol->p_len == 0)
 		printf("%.2f", 0.0);
 	if (pol->p_len == 1 && arrC[0] == 0)
+	{
 		printf("%.2f", arrC[0]);
+		printf("\n");
+		return;
+	}
+		
+
 	int first = 1;
 	int countZero = 0;
 	for (int i = 0; i < pol->p_len; i++)
