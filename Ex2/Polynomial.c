@@ -1121,9 +1121,10 @@ Polynomial* multiplication(char *name1, char *name2)
 		}
 		
 		free(polArr);
+		res->name = NULL;
 	}
 	
-	res->name = NULL;
+	
 	return res;
 }
 //6:deriven
