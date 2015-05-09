@@ -477,7 +477,17 @@ void ExtractPolynom(Polynomial* pol, char* polyStr)
 
 	//init coeffs and degree arrays and alocate memory with zero values:
 	pol->coeffs = (float*)malloc(p_len * sizeof(float));
+	if (pol->coeffs == NULL)
+	{
+		perror("Failed to allocate memory in create from existing function");
+		assert(pol->coeffs != NULL);
+	}
 	pol->degrees = (int*)malloc(p_len *sizeof(int));
+	if (pol->degrees == NULL)
+	{
+		perror("Failed to allocate memory in create from existing function");
+		assert(pol->degrees != NULL);
+	}
 	int curLen = 0;
 	//let's fill in the coeffs array 
 	//insert order - always the lowest degree will come to the first place
@@ -754,7 +764,17 @@ Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 	res->name = NULL;
 
 	float* coeffs = (float*)calloc(p1->p_len+p2->p_len, sizeof(float));
+	if (coeffs == NULL)
+	{
+		perror("failed to allocate memory ");
+		assert(coeffs != NULL);
+	}
 	int* degs = (int*)calloc(p1->p_len + p2->p_len, sizeof(int));
+	if (degs == NULL)
+	{
+		perror("failed to allocate memory ");
+		assert(degs  != NULL);
+	}
 	
 	//perform merge sort:
 	int i = 0; int j = 0; int k = 0;
@@ -801,7 +821,18 @@ Polynomial *summationByPolynomials(Polynomial* p1, Polynomial* p2)
 	//insert to res:
 	res->p_len = k;
 	res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+	if (res->coeffs == NULL)
+	{
+		perror("failed to allocate memory ");
+		assert(res->coeffs != NULL);
+	}
 	res->degrees = (int*)calloc(res->p_len, sizeof(int));
+	if (res->degrees == NULL)
+	{
+		perror("failed to allocate memory ");
+		assert(res->degrees != NULL);
+	}
+
 	for (int i = 0; i < k; i++)
 	{
 		res->coeffs[i] = coeffs[i];
@@ -843,24 +874,44 @@ Polynomial* subtraction(char *name1, char *name2)
 	{
 		
 		res = malloc(sizeof(struct Polynomial));
-		res->name = NULL;
-
 		if (res == NULL)
 		{
 			perror("Failed to allocate memory in subtraction");
 			assert(res != NULL);
 		}
+		res->name = NULL;
 		if (p1 == p2)
 		{
 			res->p_len = 1;
 			res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+			if (res->coeffs == NULL)
+			{
+				perror("failed to allocate memory");
+				assert(res->coeffs != NULL);
+			}
 			res->degrees = (int*)calloc(res->p_len, sizeof(int));
+			if (res->degrees  == NULL)
+			{
+				perror("failed to allocate memory");
+				assert(res->degrees != NULL);
+			}
 			res->coeffs[0] = 0.0;
 			res->degrees[0] = 0;
 			return res;
 		}
 		float* coeffs = (float*)calloc(p1->p_len + p2->p_len, sizeof(float));
+		if (coeffs == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(coeffs != NULL);
+		}
+
 		int* degs = (int*)calloc(p1->p_len + p2->p_len, sizeof(int));
+		if (degs == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(degs != NULL);
+		}
 
 		//perform merge sort:
 		int i = 0; int j = 0; int k = 0;
@@ -907,7 +958,18 @@ Polynomial* subtraction(char *name1, char *name2)
 		//insert to res:
 		res->p_len = k;
 		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+		if (res->coeffs == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(res->coeffs != NULL);
+		}
 		res->degrees = (int*)calloc(res->p_len, sizeof(int));
+		if (res->degrees == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(res->degrees != NULL);
+		}
+
 		for (int i = 0; i < k; i++)
 		{
 			res->coeffs[i] = coeffs[i];
@@ -934,26 +996,56 @@ Polynomial* multiplication(char *name1, char *name2)
 	else
 	{
 		res = (struct Polynomial*) malloc(sizeof(struct Polynomial));
+		if (res == NULL)
+		{
+			perror("Failed to allocate memory in create from existing function");
+			assert(res != NULL);
+		}
 		res->name = NULL;
 		res->p_len = p1->p_len * p2->p_len;
 		res->coeffs = (float*)calloc(res->p_len, sizeof(float));
+		if (res->coeffs == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(res->coeffs != NULL);
+		}
 		res->degrees = (int*)calloc(res->p_len, sizeof(int));
+		if (res->degrees == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(res->degrees != NULL);
+		}
 
 		Polynomial **polArr = malloc(p1->p_len * sizeof(Polynomial));
+		if (polArr == NULL)
+		{
+			perror("Failed to allocate memory in create from existing function");
+			assert(polArr != NULL);
+		}
 
 		for (int i = 0; i < p1->p_len; i++)
 		{
 			polArr[i] = (Polynomial*) malloc(sizeof(Polynomial));
-			polArr[i]->name = NULL;
+			
 			if (polArr[i] == NULL)
 			{
 				perror("failed to allocate memory in mul func");
 				assert(polArr[i] != NULL);
 			}
-			
+			polArr[i]->name = NULL;
 			polArr[i]->p_len = p2->p_len;
 			polArr[i]->coeffs = calloc(polArr[i]->p_len, sizeof(float));
+			if (polArr[i]->coeffs == NULL)
+			{
+				perror("failed to allocate memory in mul func");
+				assert(polArr[i]->coeffs != NULL);
+			}
 			polArr[i]->degrees = calloc(polArr[i]->p_len, sizeof(int));
+			if (polArr[i]->degrees == NULL)
+			{
+				perror("failed to allocate memory in mul func");
+				assert(polArr[i]->degrees != NULL);
+			}
 			
 
 			for (int j = 0; j < p2->p_len; j++)
@@ -994,15 +1086,25 @@ Polynomial* derivation(char *name)
 	else
 	{
 		res = malloc(sizeof(Polynomial));
-		res->name = NULL;
 		if (res == NULL)
 		{
 			perror("failed to allocated memory in driven");
 			assert(res != NULL);
 		}
+		res->name = NULL;
 		res->p_len = p1->p_len;
 		res->coeffs = calloc(res->p_len, sizeof(float));
+		if (res->coeffs == NULL)
+		{
+			perror("failed to allocate memory in der func");
+			assert(res->coeffs != NULL);
+		}
 		res->degrees = calloc(res->p_len, sizeof(int));
+		if (res->degrees == NULL)
+		{
+			perror("failed to allocate memory in der func");
+			assert(res->degrees != NULL);
+		}
 		
 		for (int i = 0; i < res->p_len; i++)
 		{
@@ -1038,6 +1140,12 @@ int createFromExisting(char* newName, char* pString)
 	if (strncmp("der ", pString, 4) == 0)
 	{
 		char *polName = malloc(sizeof(char)*(strlen(pString) - 4 + 1));
+		if (polName == NULL)
+		{
+			perror("failed to allocated memory ");
+			assert(polName != NULL);
+		}
+
 		strncpy(polName, pString + 4, strlen(pString) - 4+1);
 		polResult = derivation(polName);
 		free(polName);
@@ -1081,6 +1189,7 @@ int createFromExisting(char* newName, char* pString)
 	{
 		//polResult = malloc(sizeof(Polynomial));
 		polResult->name = malloc(strlen(newName) + 1);
+
 		if (polResult->name == NULL)
 		{
 			perror("Failed to allocate memory in create from existing function");
@@ -1098,7 +1207,18 @@ int createFromExisting(char* newName, char* pString)
 		free(polToUpdate->coeffs);
 		free(polToUpdate->degrees);
 		polToUpdate->coeffs = calloc(polResult->p_len,sizeof(float));
+		if (polToUpdate->coeffs == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(polToUpdate->coeffs != NULL);
+		}
 		polToUpdate->degrees = calloc(polResult->p_len, sizeof(int));
+		if (polToUpdate->degrees == NULL)
+		{
+			perror("failed to allocate memory in mul func");
+			assert(polToUpdate->degrees != NULL);
+		}
+
 		for (int i = 0; i < polToUpdate->p_len; i++)
 		{
 			polToUpdate->coeffs[i] = polResult->coeffs[i];
