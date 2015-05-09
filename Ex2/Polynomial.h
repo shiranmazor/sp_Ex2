@@ -29,3 +29,4 @@ void cleanMemory(void);
 int insertToPolynomArray(Polynomial* pol, int degree, float coeff, int len,int currLen);
 int binsearch(int *arr, int size, int key);
 void removeSpaces(char* src);
+char *trimwhitespace(char *str);

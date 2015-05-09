@@ -286,9 +286,59 @@ char *trimwhitespace(char *str)
 	return str;
 }
 
+char *str_replace(char *orig, char *rep, char *with) {
+	char *result; // the return string
+	char *ins;    // the next insert point
+	char *tmp;    // varies
+	int len_rep;  // length of rep
+	int len_with; // length of with
+	int len_front; // distance between rep and end of last rep
+	int count;    // number of replacements
+
+	if (!orig)
+		return NULL;
+	if (!rep)
+		rep = "";
+	len_rep = strlen(rep);
+	if (!with)
+		with = "";
+	len_with = strlen(with);
+
+	ins = orig;
+	for (count = 0; (tmp = strstr(ins, rep)); ++count) {
+		ins = tmp + len_rep;
+	}
+
+	tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+
+	if (!result)
+		return NULL;
+
+	while (count--) {
+		ins = strstr(orig, rep);
+		len_front = ins - orig;
+		tmp = strncpy(tmp, orig, len_front) + len_front;
+		tmp = strcpy(tmp, with) + len_with;
+		orig += len_front + len_rep; 
+	}
+	strcpy(tmp, orig);
+	return result;
+}
+
 int executeOperation(char* input)
 {
 	trimwhitespace(input);
+
+	char *toFree = NULL;
+	int cnt = 0;
+	while (strstr(input, "  "))
+	{
+		cnt++;
+		toFree = input;
+		input = str_replace(input, "  ", " ");
+		if (input != NULL && cnt>1)
+			free(toFree);
+	}
 
 	char **arr = NULL;
 	int arr_len = split(input, '=', &arr);
@@ -411,7 +461,8 @@ int executeOperation(char* input)
 	}
 	
 	freeArray(arr,arr_len);
-	//free(arr);
+	if (cnt > 0)
+		free(input);
 	return 1;
 }
 
@@ -1254,15 +1305,14 @@ int main(void)
 	lastPolynomialPtr = firstPolynomialPtr;
 
 	printf("Welcome to Polynomials!\n");
-	printf(" > ");
+	printf("> ");
 	char *command = getString(stdin, 10);
 
-	while (strcmp(command, "quit") != 0)
+	while (strcmp(trimwhitespace(command), "quit") != 0)
 	{
-		//int r = strchr(cmd_char, *c);
 		executeOperation(trimwhitespace(command));
 		free(command);
-		printf(" > ");
+		printf("> ");
 		command = getString(stdin,10);
 	}
 	cleanMemory();
